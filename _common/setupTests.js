@@ -1,21 +1,24 @@
 'use strict';
 
-module.exports = self;
 var self = setupTests;
+module.exports = self;
 
 global.util = require('util');
 global._ = require('underscore');
 global.async = require('async');
+
+var Logger = require('./logging/logger.js');
 
 // each test starts off as a new process
 // this function does necessary setup like getting necessary data
 function setupTests(params) {
   global.msName = params.msName;
   process.title = params.msName;
-  global.config = {};
 
+  // setup logger
+  global.config = {};
   global.config.logLevel = 'verbose';
-  require('./logging/logger.js');
+  global.logger = Logger();
 
   /* Env Set */
   global.config.apiUrl = process.env.SHIPPABLE_API_URL;
@@ -27,5 +30,5 @@ function setupTests(params) {
   global.configPath = process.env.SHIPPABLE_CONFIG_PATH;
   global.githubOwnerAccessToken = process.env.GITHUB_ACCESS_TOKEN_OWNER;
 
-  // fetch any data needed for tests
+  // fetch any more data needed for tests below
 }

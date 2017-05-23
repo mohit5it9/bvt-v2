@@ -9,22 +9,24 @@ module.exports = self;
 // will run mocha test modules
 //    https://github.com/mochajs/mocha/wiki/Using-mocha-programmatically
 
-var Adapter = require('./shippable/Adapter.js');
+var Adapter = require('./_common/shippable/Adapter.js');
 var setupTests = require('./_common/setupTests.js');
 
 var Mocha = require('mocha'),
   fs = require('fs'),
   path = require('path');
 
+start();
+
 function start() {
   var params = {
-    msName: 'bat'
+    msName: 'bvt-v2'
   };
+
+  setupTests(params);
 
   var who = util.format('msName:%s', params.msName);
   logger.info(util.format('Starting %s', who));
-
-  setupTests(params);
 
   var consoleErrors = [];
   if (!config.apiUrl)
@@ -46,18 +48,45 @@ function start() {
     );
     return process.exit(1);
   }
-
-  doCleanup();
-  startCoreTests();
+  checkHealth();
 }
 
-function startCoreTests() {
+// starts by checking if API is up
+function checkHealth() {
+  var who = util.format('%s|msName:%s', self.name, msName);
+  logger.verbose('Checking health of', who);
+
+  var adapter = new Adapter('');
+  adapter.get('',
+    function (err, res, body) {
+      if (err || !res) {
+        logger.error(
+          util.format('%s has failed api check :no response or error %s',
+            who, err)
+        );
+        process.exit(1);
+      }
+
+      if (body && body.statusCode !== 200) {
+        logger.error(who,
+          util.format('API statusCode:', body.statusCode));
+        process.exit(1);
+      }
+      startTests();
+    }
+  );
+}
+
+function startTests() {
   var bag = {
     who: 'startCoreTests'
   };
 
+  logger.debug(bag.who, 'Inside');
+
   async.series(
     [
+      // TODO: cleanup
       coreAccountLoginTests.bind(null, bag),
       coreTests.bind(null, bag)
       // TODO: cleanup
@@ -153,31 +182,3 @@ function doCleanup() {
   logger.warn('TODO: Implement Cleanup');
 }
 
-// starts by checking if API is up
-function checkHealth() {
-  var who = util.format('%s|msName:%s', self.name, msName);
-  logger.verbose('Checking health of', who);
-
-  var adapter = new Adapter('');
-  adapter.get('',
-    function (err, res) {
-      if (err || !res) {
-        logger.error(
-          util.format('%s has failed api check :no response or error %s',
-            who, err)
-        );
-        process.exit(1);
-      }
-
-      if (res && res.statusCode !== 200) {
-        logger.error(
-          util.format('%s has failed api check :bad response', who)
-        );
-        process.exit(1);
-      }
-      start();
-    }
-  );
-}
-
-checkHealth();
