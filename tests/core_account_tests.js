@@ -12,36 +12,44 @@ var githubSysIntId = null;
 describe('ACCT-GHC-ADM-IND.1 - Get shippable token for github login',
   function () {
     this.timeout(0);
-    before(function (done) {
-      setupTests('ACCT-GHC-IND');
-      getGithubSystemIntegration(done);
-    });
+    before(
+      function (done) {
+        setupTests('ACCT-GHC-IND');
+        getGithubSystemIntegration(done);
+      }
+    );
 
-    it('Test github login', function (done) {
-      logger.debug('authenticating... ');
-      var promise = loginUsingToken(nconf.get('GITHUB_ACCESS_TOKEN_OWNER'),
-        githubSysIntId);
-      promise.then(
-        function () {
-          return done();
-        },
-        function (error) {
-          return done(error);
-        });
-    });
+    it('Test github login',
+      function (done) {
+        logger.debug('authenticating... ');
+        var promise = loginUsingToken(global.githubOwnerAccessToken,
+          githubSysIntId);
+        promise.then(
+          function () {
+            return done();
+          },
+          function (error) {
+            return done(error);
+          });
+      }
+    );
     // remaining tests go here
 
-    after(function (done) {
-      logger.debug('Should save tokens in config file');
-      nconf.set('shiptest-github-owner:apiToken', tokens.ownerApiToken);
-      nconf.save(function (err) {
-        if (err) {
-          logger.debug('Failed to save tokens to config file');
-          return done(err);
-        }
-        return done();
-      });
-    });
+    after(
+      function (done) {
+        logger.debug('Should save tokens in config file');
+        nconf.set('shiptest-github-owner:apiToken', tokens.ownerApiToken);
+        nconf.save(
+          function (err) {
+            if (err) {
+              logger.debug('Failed to save tokens to config file');
+              return done(err);
+            }
+            return done();
+          }
+        );
+      }
+    );
   }
 );
 

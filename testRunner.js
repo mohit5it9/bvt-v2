@@ -16,19 +16,7 @@ var Mocha = require('mocha'),
   fs = require('fs'),
   path = require('path');
 
-start();
-
 function start() {
-  var promise = checkHealth();
-  promise.then(
-    funciton() {
-
-    },
-    function (error) {
-      logger.error('API health checks failed. Exiting...');
-      process.exit(1);
-    })
-
   var params = {
     msName: 'bat'
   };
@@ -61,7 +49,6 @@ function start() {
 
   doCleanup();
   startCoreTests();
-  doCleanup();
 }
 
 function startCoreTests() {
@@ -87,11 +74,14 @@ function coreAccountLoginTests(bag, next) {
   logger.debug(who, 'Inside');
 
   var promise = runTest('./tests/core_account_tests.js');
-  promise.then(function () {
-    return next();
-  }, function (error) {
-    return next(error);
-  });
+  promise.then(
+    function () {
+      return next();
+    },
+    function (error) {
+      return next(error);
+    }
+  );
 }
 
 function coreTests(bag, next) {
@@ -107,15 +97,21 @@ function runTest(testSuite) {
   mocha.addFile(testSuite);
 
   return new Promise(function (resolve, reject) {
-    mocha.run(function (failures) {
-      process.on('exit', function () {
-        process.exit(failures);  // exit with non-zero status for failures
-      });
-      return reject();
-    }).on('end', function () {
-      logger.debug('finished running all tests');
-      return resolve();
-    });
+    mocha.run(
+      function (failures) {
+        process.on('exit',
+          function () {
+            process.exit(failures);  // exit with non-zero status for failures
+          }
+        );
+        return reject();
+      }
+    ).on('end',
+      function () {
+        logger.debug('finished running all tests');
+        return resolve();
+      }
+      );
   });
 }
 
@@ -124,24 +120,32 @@ function runTests(testDir) {
   var mocha = new Mocha();
   // Add each .js file to the mocha instance
   var testSuites = fs.readdirSync(testDir);
-  testSuites.forEach(function (testSuite) {
-    mocha.addFile(
-      path.join(testDir, testSuite)
-    );
-  });
+  testSuites.forEach(
+    function (testSuite) {
+      mocha.addFile(
+        path.join(testDir, testSuite)
+      );
+    }
+  );
 
   // Run the tests.
   return new Promise(function (resolve, reject) {
     // asynchronous code goes here
-    mocha.run(function (failures) {
-      process.on('exit', function () {
-        process.exit(failures);  // exit with non-zero status for failures
-      });
-      reject();
-    }).on('end', function () {
-      logger.debug('finished running all tests');
-      resolve();
-    });
+    mocha.run(
+      function (failures) {
+        process.on('exit',
+          function () {
+            process.exit(failures);  // exit with non-zero status for failures
+          }
+        );
+        reject();
+      }
+    ).on('end',
+      function () {
+        logger.debug('finished running all tests');
+        resolve();
+      }
+      );
   });
 }
 
@@ -149,8 +153,8 @@ function doCleanup() {
   logger.warn('TODO: Implement Cleanup');
 }
 
-// checks if API is up
-function checkHealth(callback) {
+// starts by checking if API is up
+function checkHealth() {
   var who = util.format('%s|msName:%s', self.name, msName);
   logger.verbose('Checking health of', who);
 
@@ -162,16 +166,18 @@ function checkHealth(callback) {
           util.format('%s has failed api check :no response or error %s',
             who, err)
         );
-        return callback(true);
+        process.exit(1);
       }
 
-      if (res && res.status !== 'OK') {
+      if (res && res.statusCode !== 200) {
         logger.error(
           util.format('%s has failed api check :bad response', who)
         );
-        return callback(true);
+        process.exit(1);
       }
-      return callback();
+      start();
     }
   );
 }
+
+checkHealth();
