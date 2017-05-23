@@ -1,8 +1,7 @@
 'use strict';
 
-var self = setupTests;
-var nconf = require('nconf');
 module.exports = self;
+var self = setupTests;
 
 global.util = require('util');
 global._ = require('underscore');
@@ -15,7 +14,6 @@ function setupTests(params) {
   process.title = params.msName;
   global.config = {};
 
-
   global.config.logLevel = 'verbose';
   require('./logging/logger.js');
 
@@ -27,10 +25,7 @@ function setupTests(params) {
   global.config.githubToken = params.githubToken;
 
   global.configPath = process.env.SHIPPABLE_CONFIG_PATH;
+  global.githubOwnerAccessToken = process.env.GITHUB_ACCESS_TOKEN_OWNER;
 
-  nconf.argv().env().file({
-    file: global.configPath, format: nconf.formats.json
-  });
-  nconf.load();
   // fetch any data needed for tests
 }
