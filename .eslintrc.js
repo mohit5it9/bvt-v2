@@ -1,6 +1,6 @@
 module.exports = {
   "env": {
-    "browser": true
+    "browser": false
   },
   "plugins": [
     "callback-function"
@@ -8,34 +8,14 @@ module.exports = {
   "globals": {
     "__dirname": true,
     "_": true,
-    "$": true,
-    "ActErr": true,
-    "AMQP": true,
-    "angular": true,
-    "ansi_up": true,
-    "app": true,
     "async": true,
     "global": true,
-    "jsyaml": true,
     "config": true,
-    "d3": true,
-    "document": true,
-    "httpServer": true,
-    "io": true,
     "logger": true,
-    "MicroService": true,
     "module": true,
-    "moment": true,
     "process": true,
     "require": true,
-    "shipError": true,
-    "Set": "true",
-    "window": true,
-    "www": true,
     "util": true,
-    "respondWithError": true,
-    "sendJSONResponse": true,
-    "mapSequelizeErr": true,
     "describe": true,
     "it": true,
     "before": true,
@@ -51,6 +31,8 @@ module.exports = {
     "no-param-reassign": ["error", { "props": false }],
     "no-underscore-dangle": ["error", { "allow": ["_r", "_p"] }],
     "quote-props": ["error", "consistent-as-needed"],
+    "no-unused-vars": ["warn"],
+    "global-require": ["warn"],
 
     // rules from airbnb that we won't be using
     "consistent-return": 0,
@@ -65,15 +47,10 @@ module.exports = {
     "one-var-declaration-per-line": 0,
     "one-var": 0,
 
-
     // extra rules not present in airbnb
     "max-len": ["error", 80],
 
-    // temp turned off. If writing new file these should be turned on.
-    "no-shadow": 0,
-    "no-mixed-operators": 0,
-
     // custom rules
-    // "callback-function/on-newline": ["error", "auto-fix"]
+    "callback-function/on-newline": ["error", "auto-fix"]
   }
 };
