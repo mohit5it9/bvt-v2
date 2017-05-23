@@ -1,13 +1,8 @@
-# Optional REPL history
-.node_repl_history
-
-.idea
-.DS_Store
-node_modules/
 *.log
-*.swp
 *.swo
-
+*.swp
+.DS_Store
+.idea
 .idea/*
 .vscode/*
-
+node_modules/
