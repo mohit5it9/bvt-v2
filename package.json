@@ -22,37 +22,6 @@
     "chai": "^3.5.0",
     "chai-http": "^3.0.0",
     "util": "0.10.3",
-    "winston": "2.2.0",
-    "braintree": "1.40.0"
-  },
-  "jshintConfig": {
-    "node": true,
-    "undef": true,
-    "noarg": true,
-    "white": true,
-    "esnext": true,
-    "strict": true,
-    "newcap": true,
-    "nonbsp": true,
-    "eqeqeq": true,
-    "unused": true,
-    "maxlen": 80,
-    "indent": 2,
-    "bitwise": true,
-    "noempty": true,
-    "latedef": "nofunc",
-    "maxdepth": 5,
-    "quotmark": "single",
-    "trailing": true,
-    "camelcase": true,
-    "maxparams": 8,
-    "globalstrict": true,
-    "maxcomplexity": 8,
-    "maxstatements": 20,
-    "mocha": true,
-    "predef": [
-      "logger",
-      "util"
-    ]
+    "winston": "2.2.0"
   }
 }
