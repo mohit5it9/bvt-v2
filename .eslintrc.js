@@ -46,10 +46,10 @@ module.exports = {
     "no-param-reassign": 0,
     "one-var-declaration-per-line": 0,
     "one-var": 0,
-
     // extra rules not present in airbnb
     "max-len": ["error", 80],
-
+    // airbnb rules that we won't use
+    "no-shadow": 0,
     // custom rules
     "callback-function/on-newline": ["error", "auto-fix"]
   }

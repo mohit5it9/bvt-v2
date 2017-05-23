@@ -1,81 +1,89 @@
 'use strict';
 
-var util = require('util');
+var self = logger;
+module.exports = self;
+
 var winston = require('winston');
-var WinstonFileTransport = winston.transports.File;
-var WinstonConsoleTransport = winston.transports.Console;
-global.logger = winston;
 
-configLevel();
+function logger() {
+  var logger = winston;
+  // Once systemConfigs are obtained from the API, this will be overwritten.
+  var defaultLogLevel = 'verbose';
 
-function configLevel() {
-  winston.clear();
+  logger.clear();
 
-  winston.add(WinstonConsoleTransport,
+  logger.add(winston.transports.Console,
     {
       timestamp: true,
       colorize: true,
-      level: config.logLevel
+      level: defaultLogLevel
     }
   );
 
-  winston.add(WinstonFileTransport, {
-    name: 'file#out',
-    timestamp: true,
-    colorize: true,
-    filename: util.format('logs/%s.log', msName),
-    maxsize: 10485760, // maxsize: 10mb
-    maxFiles: 20,
-    level: global.config.logLevel,
-    json: false
-  }
+  logger.add(winston.transports.File,
+    {
+      name: 'file#out',
+      timestamp: true,
+      colorize: true,
+      filename: util.format('logs/%s.log', global.msName),
+      maxsize: 10 * 1024 * 1024,  // 10 MB
+      maxFiles: 20,
+      level: defaultLogLevel,
+      json: false
+    }
   );
 
-  winston.add(WinstonFileTransport, {
-    name: 'file#err',
-    timestamp: true,
-    colorize: true,
-    filename: util.format('logs/%s_err.log', msName),
-    maxsize: 10485760, // maxsize: 10mb
-    maxFiles: 20,
-    level: 'error',
-    json: false
-  }
+  logger.add(winston.transports.File,
+    {
+      name: 'file#err',
+      timestamp: true,
+      colorize: true,
+      filename: util.format('logs/%s_err.log', global.msName),
+      maxsize: 10 * 1024 * 1024, // 10 MB
+      maxFiles: 20,
+      level: 'error',
+      json: false
+    }
   );
 
-  winston.add(WinstonFileTransport, {
-    name: 'file#warn',
-    timestamp: true,
-    colorize: true,
-    filename: util.format('logs/%s_warn.log', msName),
-    maxsize: 5242880, // maxsize: 5mb
-    maxFiles: 20,
-    level: 'warn',
-    json: false
-  }
+  logger.add(winston.transports.File,
+    {
+      name: 'file#warn',
+      timestamp: true,
+      colorize: true,
+      filename: util.format('logs/%s_warn.log', global.msName),
+      maxsize: 5 * 1024 * 1024, // 5 MB
+      maxFiles: 20,
+      level: 'warn',
+      json: false
+    }
   );
 
-  winston.add(WinstonFileTransport, {
-    name: 'file#info',
-    timestamp: true,
-    colorize: true,
-    filename: util.format('logs/%s_info.log', msName),
-    maxsize: 5242880, // maxsize: 5mb
-    maxFiles: 20,
-    level: 'info',
-    json: false
-  }
+  logger.add(winston.transports.File,
+    {
+      name: 'file#info',
+      timestamp: true,
+      colorize: true,
+      filename: util.format('logs/%s_info.log', global.msName),
+      maxsize: 5 * 1024 * 1024, // 5 MB
+      maxFiles: 20,
+      level: 'info',
+      json: false
+    }
   );
 
-  winston.add(WinstonFileTransport, {
-    name: 'file#debug',
-    timestamp: true,
-    colorize: true,
-    filename: util.format('logs/%s_debug.log', msName),
-    maxsize: 5242880, // maxsize: 5mb
-    maxFiles: 20,
-    level: 'debug',
-    json: false
-  }
+  logger.add(winston.transports.File,
+    {
+      name: 'file#debug',
+      timestamp: true,
+      colorize: true,
+      filename: util.format('logs/%s_debug.log', global.msName),
+      maxsize: 5 * 1024 * 1024, // 5 MB
+      maxFiles: 20,
+      level: 'debug',
+      json: false
+    }
   );
+
+  return logger;
 }
