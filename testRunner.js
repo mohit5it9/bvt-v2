@@ -9,9 +9,7 @@ module.exports = self;
 // will run mocha test modules
 //    https://github.com/mochajs/mocha/wiki/Using-mocha-programmatically
 
-
-var checkHealth = require('./_common/checkHealth.js');
-var MS = require('./_common/micro/MicroService.js');
+var Adapter = require('./shippable/Adapter.js');
 var setupTests = require('./_common/setupTests.js');
 
 var Mocha = require('mocha'),
@@ -21,21 +19,26 @@ var Mocha = require('mocha'),
 start();
 
 function start() {
-  var msParams = {
-    checkHealth: checkHealth
-  };
+  var promise = checkHealth();
+  promise.then(
+    funciton() {
+
+    },
+    function (error) {
+      logger.error('API health checks failed. Exiting...');
+      process.exit(1);
+    })
 
   var params = {
     msName: 'bat'
   };
 
   var who = util.format('msName:%s', params.msName);
-
-  var consoleErrors = [];
-  setupTests(params);
-
   logger.info(util.format('Starting %s', who));
 
+  setupTests(params);
+
+  var consoleErrors = [];
   if (!config.apiUrl)
     consoleErrors.push(util.format('%s is missing env var: SHIPPABLE_API_URL',
       who));
@@ -56,15 +59,9 @@ function start() {
     return process.exit(1);
   }
 
-  logger.info(util.format('system config checks for %s succeeded', who));
-
-
-  // do cleanup before starting tests
   doCleanup();
-  // start tests after microservice has finished health checks
-  var microService = new MS(msParams, function () {
-    startCoreTests();
-  });
+  startCoreTests();
+  doCleanup();
 }
 
 function startCoreTests() {
@@ -89,8 +86,7 @@ function coreAccountLoginTests(bag, next) {
   var who = bag.who + '|' + coreAccountLoginTests.name;
   logger.debug(who, 'Inside');
 
-  // TODO: have a common test runner
-  var promise = runTest('./testUtils/testTokenExchange.js');
+  var promise = runTest('./tests/core_account_tests.js');
   promise.then(function () {
     return next();
   }, function (error) {
@@ -151,4 +147,31 @@ function runTests(testDir) {
 
 function doCleanup() {
   logger.warn('TODO: Implement Cleanup');
+}
+
+// checks if API is up
+function checkHealth(callback) {
+  var who = util.format('%s|msName:%s', self.name, msName);
+  logger.verbose('Checking health of', who);
+
+  var adapter = new Adapter('');
+  adapter.get('',
+    function (err, res) {
+      if (err || !res) {
+        logger.error(
+          util.format('%s has failed api check :no response or error %s',
+            who, err)
+        );
+        return callback(true);
+      }
+
+      if (res && res.status !== 'OK') {
+        logger.error(
+          util.format('%s has failed api check :bad response', who)
+        );
+        return callback(true);
+      }
+      return callback();
+    }
+  );
 }

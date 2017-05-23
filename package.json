@@ -1,18 +1,10 @@
 {
-  "name": "bvt",
+  "name": "bvt-v2",
   "version": "0.0.1",
   "description": "Shippable Build Acceptance Tests",
   "main": "app.js",
   "scripts": {
-    "start": "node testRunner.js",
-    "test": "./node_modules/mocha/bin/mocha -R mocha-multi tests/**/**/*",
-    "test-core": "./node_modules/mocha/bin/mocha -R mocha-multi tests/core/*.js",
-    "test-daily": "./node_modules/mocha/bin/mocha -R mocha-multi tests/daily/**/*.js",
-    "test-tokenExchange": "./node_modules/mocha/bin/mocha testUtils/tokenExchange/testTokenExchange.js",
-    "test-getAccounts": "./node_modules/mocha/bin/mocha testsUtils/getAccounts.js",
-    "test-deleteAccounts": "./node_modules/mocha/bin/mocha testsUtils/deleteAccount.js",
-    "test-teardown": "./node_modules/mocha/bin/mocha testUtils/teardown.js",
-    "test-organizationOwner": "./node_modules/mocha/bin/mocha -S -b tests/*.js"
+    "test": "node testRunner.js"
   },
   "author": "Avi Cavale <avi@shippable.com> (http://shippable.com/)",
   "dependencies": {

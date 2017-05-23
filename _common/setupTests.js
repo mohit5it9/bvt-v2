@@ -19,7 +19,6 @@ function setupTests(params) {
   global.config.logLevel = 'verbose';
   require('./logging/logger.js');
 
-  logger.debug('setting up test suite');
   /* Env Set */
   global.config.apiUrl = process.env.SHIPPABLE_API_URL;
   global.config.apiToken = process.env.SHIPPABLE_API_TOKEN;

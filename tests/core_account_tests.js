@@ -9,8 +9,7 @@ var ShippableAdapter = require('../_common/shippable/Adapter.js');
 var tokens = {};
 var githubSysIntId = null;
 
-
-describe('Get shippable token for github login',
+describe('ACCT-GHC-ADM-IND.1 - Get shippable token for github login',
   function () {
     this.timeout(0);
     before(function (done) {

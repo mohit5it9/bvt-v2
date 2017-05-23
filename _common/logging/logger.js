@@ -11,12 +11,12 @@ configLevel();
 function configLevel() {
   winston.clear();
 
-  winston.add(WinstonConsoleTransport, {
-    timestamp: true,
-    colorize: true,
-    level: config.logLevel
-    level: 'info'
-  }
+  winston.add(WinstonConsoleTransport,
+    {
+      timestamp: true,
+      colorize: true,
+      level: config.logLevel
+    }
   );
 
   winston.add(WinstonFileTransport, {
