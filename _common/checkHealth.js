@@ -3,23 +3,31 @@
 var self = checkHealth;
 module.exports = self;
 
-var checkShippableApi = require('./healthChecks/checkShippableApi.js');
+var Adapter = require('./shippable/Adapter.js');
 
+// checks if API is up
 function checkHealth(callback) {
-  var bag = {};
-  bag.who = util.format('%s|msName:%s', self.name, msName);
-  logger.verbose('Checking health of', bag.who);
+  var who = util.format('%s|msName:%s', self.name, msName);
+  logger.verbose('Checking health of', who);
 
-  async.series([
-    checkShippableApi.bind(null, null)
-  ],
-    function (err) {
-      if (err)
-        logger.error(bag.who, 'Failed health checks', err);
-      else
-        logger.verbose(bag.who, 'Successful health checks');
+  var adapter = new Adapter('');
+  adapter.get('',
+    function (err, res) {
+      if (err || !res) {
+        logger.error(
+          util.format('%s has failed api check :no response or error %s',
+            who, err)
+        );
+        return callback(true);
+      }
 
-      return callback(err);
+      if (res && res.status !== 'OK') {
+        logger.error(
+          util.format('%s has failed api check :bad response', who)
+        );
+        return callback(true);
+      }
+      return callback();
     }
   );
 }

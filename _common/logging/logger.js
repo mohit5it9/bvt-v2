@@ -14,7 +14,7 @@ function configLevel() {
   winston.add(WinstonConsoleTransport, {
     timestamp: true,
     colorize: true,
-    // level: config.logLevel
+    level: config.logLevel
     level: 'info'
   }
   );
@@ -27,7 +27,6 @@ function configLevel() {
     maxsize: 10485760, // maxsize: 10mb
     maxFiles: 20,
     level: global.config.logLevel,
-    level: 'verbose',
     json: false
   }
   );
