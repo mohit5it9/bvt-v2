@@ -21,7 +21,8 @@ module.exports = {
     "before": true,
     "msName": true,
     "Promise": true,
-    "after": true
+    "after": true,
+    "assert": true
   },
   "extends": "airbnb-base/legacy",
   "rules": {

@@ -3,6 +3,9 @@
 var self = setupTests;
 module.exports = self;
 
+var chai = require('chai');
+global.assert = chai.assert;
+
 global.util = require('util');
 global._ = require('underscore');
 global.async = require('async');
