@@ -53,6 +53,11 @@ function ShippableAdapter(token) {
 
  */
 
+ShippableAdapter.prototype.postAuth = function (sysIntId, json, callback) {
+  var url = util.format('/accounts/auth/%s', sysIntId);
+  this.post(url, json, callback);
+};
+
 ShippableAdapter.prototype.getAccountById =
   function (id, callback) {
     this.get(
@@ -1171,9 +1176,10 @@ function _performCall(bag, next) {
             if (bag.timeoutLength > bag.timeoutLimit)
               bag.timeoutLength = 1;
 
-            setTimeout(function () {
-              __attempt(bag, callback);
-            }, bag.timeoutLength * 1000);
+            setTimeout(
+              function () {
+                __attempt(bag, callback);
+              }, bag.timeoutLength * 1000);
 
             return;
           }

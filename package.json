@@ -9,17 +9,16 @@
   "author": "Avi Cavale <avi@shippable.com> (http://shippable.com/)",
   "dependencies": {
     "async": "2.0.0",
+    "chai": "4.0.0",
     "github": "6.1.0",
     "mocha": "3.3.0",
     "nconf": "0.8.4",
-    "should": "5.2.0",
-    "underscore": "1.8.3",
-    "request": "2.78.0",
+    "oauth": "0.9.15",
     "parse-links": "0.1.0",
     "querystring": "0.2.0",
-    "oauth": "0.9.15",
-    "chai": "3.5.0",
-    "chai-http": "3.0.0",
+    "request": "2.78.0",
+    "should": "5.2.0",
+    "underscore": "1.8.3",
     "util": "0.10.3",
     "winston": "2.2.0"
   }
