@@ -3,7 +3,9 @@
 var self = start;
 module.exports = self;
 
-// Entry point for all the tests
+// NOTE: this file will be used when more tests are put in place
+//  until then tests are run by a shell script. refer package.json
+
 // setup the microservice for api health checks
 // fetch system integrations for Auth using service user token
 // will run mocha test modules
