@@ -4,7 +4,6 @@
   "description": "Shippable Build Acceptance Tests",
   "main": "app.js",
   "scripts": {
-    "test": "node testRunner.js",
     "test-coreAccountLogin": "./node_modules/mocha/bin/mocha tests/core_account_tests.js"
   },
   "author": "Avi Cavale <avi@shippable.com> (http://shippable.com/)",
