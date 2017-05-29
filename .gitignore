@@ -1,0 +1,8 @@
+*.log
+*.swo
+*.swp
+.DS_Store
+.idea
+.idea/*
+.vscode/*
+node_modules/

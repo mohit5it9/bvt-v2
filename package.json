@@ -1,0 +1,25 @@
+{
+  "name": "bvt-v2",
+  "version": "0.0.1",
+  "description": "Shippable Build Acceptance Tests",
+  "main": "app.js",
+  "scripts": {
+    "test-coreAccountLogin": "./node_modules/mocha/bin/mocha tests/core_account_tests.js"
+  },
+  "author": "Avi Cavale <avi@shippable.com> (http://shippable.com/)",
+  "dependencies": {
+    "async": "2.0.0",
+    "chai": "4.0.0",
+    "github": "6.1.0",
+    "mocha": "3.3.0",
+    "nconf": "0.8.4",
+    "oauth": "0.9.15",
+    "parse-links": "0.1.0",
+    "querystring": "0.2.0",
+    "request": "2.78.0",
+    "should": "5.2.0",
+    "underscore": "1.8.3",
+    "util": "0.10.3",
+    "winston": "2.2.0"
+  }
+}
