@@ -1,7 +1,6 @@
 'use strict';
 
 var nconf = require('nconf');
-var request = require('request');
 var setupTests = require('../_common/setupTests.js');
 
 var tokens = {};
@@ -9,12 +8,13 @@ var githubSysIntId = null;
 
 var testSuite = 'ACCT-GHC-ADM-IND';
 var testSuiteDesc = '- TestCases for Github Admin for login';
+
 describe(testSuite + testSuiteDesc,
   function () {
-    this.timeout(global.TIMEOUT_VALUE);
     before(
       function (done) {
         setupTests();
+        this.timeout(global.TIMEOUT_VALUE);
         var query = 'masterName=githubKeys&name=auth';
         global.suAdapter.getSystemIntegrations(query,
           function (err, systemIntegrations) {
