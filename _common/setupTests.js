@@ -14,6 +14,7 @@ var ShippableAdapter = require('../_common/shippable/Adapter.js');
 // each test starts off as a new process, setup required constants
 function setupTests() {
   global.config = {};
+  global.TIMEOUT_VALUE = 0;
   global.config.apiUrl = process.env.SHIPPABLE_API_URL;
   global.config.githubUrl = 'https://api.github.com';
 

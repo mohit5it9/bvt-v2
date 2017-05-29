@@ -1,4 +1,5 @@
 module.exports = {
+  // TODO: add a shippable.yml for linting checks
   "env": {
     "browser": false
   },

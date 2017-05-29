@@ -11,7 +11,7 @@ var testSuite = 'ACCT-GHC-ADM-IND';
 var testSuiteDesc = '- TestCases for Github Admin for login';
 describe(testSuite + testSuiteDesc,
   function () {
-    this.timeout(0);
+    this.timeout(global.TIMEOUT_VALUE);
     before(
       function (done) {
         setupTests();
