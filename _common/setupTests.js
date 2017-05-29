@@ -18,7 +18,8 @@ function setupTests() {
   global.config.apiUrl = process.env.SHIPPABLE_API_URL;
   global.config.githubUrl = 'https://api.github.com';
 
-  global.configPath = process.env.SHIPPABLE_CONFIG_PATH;
+  global.configPath = process.env.SHIPPABLE_CONFIG_PATH ||
+    process.cwd() + '/config.json';
   global.githubOwnerAccessToken = process.env.GITHUB_ACCESS_TOKEN_OWNER;
 
   global.suAdapter = new ShippableAdapter(process.env.SHIPPABLE_API_TOKEN);
