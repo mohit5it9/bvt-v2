@@ -39,16 +39,17 @@ describe(testSuite + testSuiteDesc,
           accessToken: global.githubOwnerAccessToken
         };
         global.pubAdapter.postAuth(githubSysIntId, json,
-        function (err, body, res) {
-          assert.strictEqual(err, null, 'Error should be null');
-          assert.isNotEmpty(res, 'Result should not be empty');
-          assert.strictEqual(res.statusCode, 200, 'statusCode should be 200');
-          assert.isNotEmpty(body, 'body should not be null');
-          assert.isNotNull(body.apiToken, 'API token should not be null');
+          function (err, body, res) {
+            assert.strictEqual(err, null, 'Error should be null');
+            assert.isNotEmpty(res, 'Result should not be empty');
+            assert.strictEqual(res.statusCode, 200, 'statusCode should be 200');
+            assert.isNotEmpty(body, 'body should not be null');
+            assert.isNotNull(body.apiToken, 'API token should not be null');
 
-          tokens.githubOwnerApiToken = body.apiToken;
-          return done(err);
-        });
+            tokens.githubOwnerApiToken = body.apiToken;
+            return done(err);
+          }
+        );
       }
     );
 
