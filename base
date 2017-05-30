@@ -1,0 +1,52 @@
+#!/bin/bash -e
+
+readonly COMPONENT=bvt
+readonly ONEBOX_NAME="$COMPONENT"_onebox
+readonly CYAN="\e[96m"
+readonly RESET="\e[39m"
+
+log.info() {
+  echo -e "$CYAN$@$RESET"
+}
+
+log.verbose() {
+  echo -e $@
+}
+
+stop() {
+  local onebox_exist=$(sudo docker ps -a | grep $ONEBOX_NAME | awk '{print $1}')
+  if [[ ! -z "$onebox_exist" ]]; then
+    log.info "Removing $COMPONENT container..."
+    sudo docker rm -f $ONEBOX_NAME > /dev/null
+  fi
+}
+
+build() {
+  log.info "Building $COMPONENT image..."
+  sudo docker build -t shipimg/$COMPONENT .
+}
+
+run_container() {
+  log.info "Running $COMPONENT..."
+  sudo docker run --name=$ONEBOX_NAME \
+    -d \
+    -v $(pwd):/home/shippable/$COMPONENT:rw \
+    -t shipimg/$COMPONENT \
+    > /dev/null
+
+  log.verbose "$COMPONENT is now running"
+}
+
+run_npm_install() {
+  log.info "Running npm install..."
+  docker exec $ONEBOX_NAME bash -c "cd /home/shippable/$COMPONENT && npm install"
+}
+
+main() {
+  stop
+  build
+  run_container
+  run_npm_install
+}
+
+main
