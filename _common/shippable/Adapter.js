@@ -1162,12 +1162,12 @@ function _performCall(bag, next) {
           );
         else
           connectionError = true;
-
         if (res && res.statusCode > 299)
           err = err || res.statusCode;
 
         if ((res && res.statusCode > 299) || err)
-          if ((res && res.statusCode >= 500) || connectionError) {
+          if ((res && res.statusCode >= 500) || connectionError ||
+            res.statusCode === 408) {
             logger.error(
               util.format('%s returned error. Retrying in %s seconds',
                 bag.who, bag.timeoutLength * 2)
