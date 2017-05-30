@@ -11,10 +11,10 @@ var testSuiteDesc = '- TestCases for Github Admin for login';
 
 describe(testSuite + testSuiteDesc,
   function () {
+    this.timeout(0);
     before(
       function (done) {
         setupTests();
-        this.timeout(global.TIMEOUT_VALUE);
         var query = 'masterName=githubKeys&name=auth';
         global.suAdapter.getSystemIntegrations(query,
           function (err, systemIntegrations) {
