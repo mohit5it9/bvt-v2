@@ -1,9 +1,8 @@
 'use strict';
 
-var nconf = require('nconf');
 var setupTests = require('../_common/setupTests.js');
 
-var tokens = {};
+var account = {};
 var githubSysIntId = null;
 
 var testSuite = 'ACCT-GHC-ADM-IND';
@@ -46,7 +45,9 @@ describe(testSuite + testSuiteDesc,
             assert.isNotEmpty(body, 'body should not be null');
             assert.isNotNull(body.apiToken, 'API token should not be null');
 
-            tokens.githubOwnerApiToken = body.apiToken;
+            account.githubOwnerApiToken = body.apiToken;
+            account.ownerId = body.account.id;
+
             return done(err);
           }
         );
@@ -55,10 +56,14 @@ describe(testSuite + testSuiteDesc,
 
     after(
       function (done) {
-        nconf.set('shiptest-github-owner:apiToken', tokens.ownerApiToken);
-        nconf.save(
-          function (err) {
-            assert.isNotOk(err, 'Failed to save tokens to config file');
+        // save account id and apiToken
+        global.saveResource(
+          {
+            type: 'account',
+            id: account.ownerId,
+            apiToken: account.githubOwnerApiToken
+          },
+          function () {
             return done();
           }
         );

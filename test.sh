@@ -18,6 +18,7 @@ setupTestEnv() {
 
   pushd $RES_REPO_STATE
   npm install
+  npm run doCleanup
   npm run test-coreAccountLogin
   popd
 

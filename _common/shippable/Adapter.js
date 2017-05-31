@@ -66,6 +66,14 @@ ShippableAdapter.prototype.getAccountById =
     );
   };
 
+ShippableAdapter.prototype.deleteAccountById =
+  function (accountId, callback) {
+    this.delete(
+      util.format('/accounts/%s', accountId),
+      callback
+    );
+  };
+
 ShippableAdapter.prototype.getAccounts =
   function (query, callback) {
     this.get(
