@@ -20,7 +20,7 @@ function setup() {
   logger.info(who, 'cleaning up tests');
   setupTests();
 
-  oldConfigPath = process.env.BVT_PREV_RES_PATH + '/resources.json';
+  oldConfigPath = process.env.JOB_PREVIOUS_STATE + '/resources.json';
   if (!fs.existsSync(oldConfigPath)) {
     logger.warn(who, 'Skipping cleanup as no previous resource file was found');
     return;
