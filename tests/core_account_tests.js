@@ -4,6 +4,7 @@ var setupTests = require('../_common/setupTests.js');
 
 var account = {};
 var githubSysIntId = null;
+var backoff = require('backoff');
 
 var testSuite = 'ACCT-GHC-ADM-IND';
 var testSuiteDesc = '- TestCases for Github Admin for login';
@@ -49,6 +50,63 @@ describe(testSuite + testSuiteDesc,
             account.ownerId = body.account.id;
 
             return done(err);
+          }
+        );
+      }
+    );
+
+    it('2. Login account should finish syncing',
+      function () {
+        var accountSynced = new Promise(
+          function (resolve, reject) {
+            var query = util.format('accountIds=%s', account.ownerId);
+
+            var expBackoff = backoff.exponential({
+              initialDelay: 100, // ms
+              maxDelay: 5000 // max retry interval of 5 seconds
+            });
+            expBackoff.failAfter(30); // fail after 30 attempts
+            expBackoff.on('backoff',
+              function (number, delay) {
+                logger.info('Account syncing. Retrying after ', delay, ' ms');
+              }
+            );
+
+            expBackoff.on('ready',
+              function () {
+                // set account when ready
+                global.suAdapter.getAccounts(query,
+                  function (err, accounts) {
+                    if (err)
+                      return reject(new Error('Failed to get account with err',
+                        err));
+
+                    var account = _.first(accounts);
+                    if (!!account.isSyncing || !account.lastSyncStartDate) {
+                      expBackoff.backoff();
+                    } else {
+                      expBackoff.reset();
+                      return resolve(account);
+                    }
+                  }
+                );
+              }
+            );
+
+            // max number of backoffs reached
+            expBackoff.on('fail',
+              function () {
+                return reject(new Error('Max number of backoffs reached'));
+              }
+            );
+
+            expBackoff.backoff();
+          }
+        );
+        return accountSynced.then(
+          function (account) {
+            assert.isNotNull(account, 'account should not be null');
+            assert.isNotEmpty(account, 'account should not be empty');
           }
         );
       }
