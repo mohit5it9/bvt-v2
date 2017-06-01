@@ -28,9 +28,28 @@ function setupTests() {
 
   // setup any more data needed for tests below
   global.ownerProjectsNum = 1;
+  global.GITHUB_OWNER_API_TOKEN_KEY = 'githubOwnerApiToken';
+  global.GHC_OWNER_PRIVATE_PROJ = 'testprivate';
 }
 
+// if no param given, it reads from nconf
 global.setupGithubOwnerAdapter = function (apiToken) {
+  nconf.file(global.resourcePath);
+  nconf.load();
+  if (apiToken) {
+    nconf.set(global.GITHUB_OWNER_API_TOKEN_KEY, apiToken);
+    nconf.save(
+      function (err) {
+        if (err) {
+          logger.error('Failed to save account info to nconf. Exiting...');
+          process.exit(1);
+        }
+      }
+    );
+  } else {
+    apiToken = nconf.get(global.GITHUB_OWNER_API_TOKEN_KEY);
+  }
+
   global.ghcOwnerAdapter = new ShippableAdapter(apiToken);
 };
 
