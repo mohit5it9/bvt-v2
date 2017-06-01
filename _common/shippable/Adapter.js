@@ -633,6 +633,14 @@ ShippableAdapter.prototype.deleteProjectById =
     );
   };
 
+ShippableAdapter.prototype.syncProjectById =
+  function (projectId, callback) {
+    this.get(
+      util.format('/projects/%s?forceSync=true', projectId),
+      callback
+    );
+  };
+
 ShippableAdapter.prototype.postBuild =
   function (json, callback) {
     this.post(

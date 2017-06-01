@@ -48,6 +48,30 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
+    it('2. Can Synchonize a private project',
+      function () {
+        var projectSynced = new Promise(
+          function (resolve, reject) {
+            global.ghcOwnerAdapter.syncProjectById(projectId,
+              function (err, project) {
+                if (err)
+                  return reject(new Error(util.format('Failed to sync project' +
+                    '%s with error: %s', projectId, err)));
+                return resolve(project);
+              }
+            );
+          }
+        );
+        return projectSynced.then(
+          function (project) {
+            // NOTE: can add more assertions here
+            assert.isNotEmpty(project.branches,
+              'Project should have branches');
+          }
+        );
+      }
+    );
+
     // do cleanup of all the resources. if cleanup fails, resource will
     // be tracked in nconf
     after(
