@@ -48,6 +48,7 @@ describe(testSuite + testSuiteDesc,
 
             account.githubOwnerApiToken = body.apiToken;
             account.ownerId = body.account.id;
+            global.setupGithubOwnerAdapter(body.apiToken);
 
             return done(err);
           }
@@ -107,6 +108,56 @@ describe(testSuite + testSuiteDesc,
           function (account) {
             assert.isNotNull(account, 'account should not be null');
             assert.isNotEmpty(account, 'account should not be empty');
+          }
+        );
+      }
+    );
+
+    it('3. Login - should sync projects',
+      function () {
+        var getProjects = new Promise(
+          function (resolve, reject) {
+            global.ghcOwnerAdapter.getProjects('',
+              function (err, projects) {
+                if (err)
+                  return reject(new Error('Unable to get projects with error',
+                    err));
+                return resolve(projects);
+              }
+            );
+          }
+        );
+        return getProjects.then(
+          function (projects) {
+            // TODO : check if a list of projects be checked to make the
+            //        test more narrow. should also run locally
+            assert.isNotNull(projects, 'Projects should not be null');
+            assert.isNotEmpty(projects, 'Projects should not be empty');
+          }
+        );
+      }
+    );
+
+    it('3. Login - should create subscriptions',
+      function () {
+        var getSubs = new Promise(
+          function (resolve, reject) {
+            global.ghcOwnerAdapter.getSubscriptions('',
+              function (err, projects) {
+                if (err)
+                  return reject(new Error('Unable to get subs with error',
+                    err));
+                return resolve(projects);
+              }
+            );
+          }
+        );
+        return getSubs.then(
+          function (projects) {
+            // TODO : check if a list of subscriptions be checked to make the
+            //        test more narrow. should also run locally
+            assert.isNotNull(projects, 'Subscriptions should not be null');
+            assert.isNotEmpty(projects, 'Subscriptions should not be empty');
           }
         );
       }
