@@ -624,6 +624,15 @@ ShippableAdapter.prototype.enableProjectById =
     );
   };
 
+ShippableAdapter.prototype.deleteProjectById =
+  function (projectId, json, callback) {
+    this.post(
+      util.format('/projects/%s/disable', projectId),
+      json,
+      callback
+    );
+  };
+
 ShippableAdapter.prototype.postBuild =
   function (json, callback) {
     this.post(

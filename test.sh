@@ -20,6 +20,7 @@ setupTestEnv() {
   npm install
   npm run doCleanup
   npm run test-coreAccountLogin
+  npm run test-coreTests
   popd
 
   echo "Completed Testing Env setup" $RES_REPO

@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test-coreAccountLogin": "./node_modules/mocha/bin/mocha tests/core_account_tests.js",
+    "test-coreTests": "./node_modules/mocha/bin/mocha tests/core/*.js",
     "doCleanup": "node doCleanup.js"
   },
   "author": "Avi Cavale <avi@shippable.com> (http://shippable.com/)",
