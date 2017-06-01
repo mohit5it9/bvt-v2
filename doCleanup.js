@@ -62,9 +62,25 @@ function deleteResources(resourcesToClean) {
   );
 }
 
-function deleteProject(projRes) {
+function deleteProject(projRes, next) {
   var who = scriptName + deleteProject.name + '|';
-  logger.warn(who, 'To implement');
+  var projectId = projRes.id;
+  if (!projectId) {
+    logger.warn('project id should not be null');
+    return next();
+  }
+  global.suAdapter.deleteProjectById(projectId, {},
+    function (err) {
+      if (err) {
+        logger.error(who, 'failed to delete the project, id:', projectId,
+          'err:', err);
+      } else {
+        logger.info(who, 'deleted project with id: ', projectId);
+        deletedResList.push(projRes);
+      }
+      return next();
+    }
+  );
 }
 
 function deleteAccount(accRes, next) {
@@ -78,7 +94,8 @@ function deleteAccount(accRes, next) {
   global.suAdapter.deleteAccountById(accountId,
     function (err) {
       if (err) {
-        logger.error(who, 'failed to delete account. err:', err);
+        logger.error(who, 'failed to delete account. id: ', accountId,
+          'err:', err);
       } else {
         logger.info(who, 'deleted account. accountId=', accountId);
         deletedResList.push(accRes);
