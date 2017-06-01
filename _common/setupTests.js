@@ -27,8 +27,12 @@ function setupTests() {
   global.pubAdapter = new ShippableAdapter(''); // init public adapter
 
   // setup any more data needed for tests below
+  global.ownerProjectsNum = 1;
 }
 
+global.setupGithubOwnerAdapter = function (apiToken) {
+  global.ghcOwnerAdapter = new ShippableAdapter(apiToken);
+};
 
 // NOTE: if state is not forwarded properly in case bvt gets stuck,
 //       use s3 to save the state instead of $JOB_PREVOUS_STATE
