@@ -129,7 +129,7 @@ describe(testSuite + testSuiteDesc,
     after(
       function (done) {
         // delete project
-        global.ghcCollabAdapter.deleteProjectById(projectId, {},
+        global.suAdapter.deleteProjectById(projectId, {},
           function (err) {
             if (err) {
               logger.warn(testSuite, 'Cleanup - failed to delete the project');
