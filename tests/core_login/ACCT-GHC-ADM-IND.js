@@ -1,6 +1,6 @@
 'use strict';
 
-var setupTests = require('../_common/setupTests.js');
+var setupTests = require('../../_common/setupTests.js');
 
 var account = {};
 var githubSysIntId = null;
@@ -106,7 +106,6 @@ describe(testSuite + testSuiteDesc,
         );
         return accountSynced.then(
           function (account) {
-            assert.isNotNull(account, 'account should not be null');
             assert.isNotEmpty(account, 'account should not be empty');
           }
         );
@@ -131,33 +130,31 @@ describe(testSuite + testSuiteDesc,
           function (projects) {
             // TODO : check if a list of projects be checked to make the
             //        test more narrow. should also run locally
-            assert.isNotNull(projects, 'Projects should not be null');
             assert.isNotEmpty(projects, 'Projects should not be empty');
           }
         );
       }
     );
 
-    it('3. Login - should create subscriptions',
+    it('4. Login - should create subscriptions',
       function () {
         var getSubs = new Promise(
           function (resolve, reject) {
             global.ghcOwnerAdapter.getSubscriptions('',
-              function (err, projects) {
+              function (err, subs) {
                 if (err)
                   return reject(new Error('Unable to get subs with error',
                     err));
-                return resolve(projects);
+                return resolve(subs);
               }
             );
           }
         );
         return getSubs.then(
-          function (projects) {
+          function (subs) {
             // TODO : check if a list of subscriptions be checked to make the
             //        test more narrow. should also run locally
-            assert.isNotNull(projects, 'Subscriptions should not be null');
-            assert.isNotEmpty(projects, 'Subscriptions should not be empty');
+            assert.isNotEmpty(subs, 'Subscriptions should not be empty');
           }
         );
       }
