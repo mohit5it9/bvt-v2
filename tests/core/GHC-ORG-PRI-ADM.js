@@ -72,6 +72,58 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
+    it('3. Can pause a private project',
+      function () {
+        var pauseProject = new Promise(
+          function (resolve, reject) {
+            var json = {propertyBag: {isPaused: true}};
+            global.ghcOwnerAdapter.putProjectById(projectId, json,
+              function (err, project) {
+                if (err)
+                  return reject(new Error('Cannot pause project'));
+                return resolve(project);
+              }
+            );
+          }
+        );
+        return pauseProject.then(
+          function (project) {
+            assert.isNotEmpty(project, 'project should not be empty');
+            assert.isNotEmpty(project.propertyBag, 'propertyBag should not be'
+              + 'empty');
+            assert.strictEqual(project.propertyBag.isPaused, true,
+              'isPaused should be set to true');
+          }
+        );
+      }
+    );
+
+    it('4. Can resume a private project',
+      function () {
+        var pauseProject = new Promise(
+          function (resolve, reject) {
+            var json = {propertyBag: {isPaused: false}};
+            global.ghcOwnerAdapter.putProjectById(projectId, json,
+              function (err, project) {
+                if (err)
+                  return reject(new Error(util.format('Cannot resume project' +
+                  'id: %s, err: %s', projectId, err)));
+                return resolve(project);
+              }
+            );
+          }
+        );
+        return pauseProject.then(
+          function (project) {
+            assert.isNotEmpty(project, 'project should not be empty');
+            assert.isNotEmpty(project.propertyBag, 'propertyBag should not be'
+              + 'empty');
+            assert.strictEqual(project.propertyBag.isPaused, false,
+              'isPaused should be set to false');
+          }
+        );
+      }
+    );
     // do cleanup of all the resources. if cleanup fails, resource will
     // be tracked in nconf
     after(
