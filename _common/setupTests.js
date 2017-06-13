@@ -22,26 +22,26 @@ function setupTests() {
 
   global.resourcePath = process.env.JOB_STATE + '/resources.json';
   global.githubOwnerAccessToken = process.env.GITHUB_ACCESS_TOKEN_OWNER;
-  global.githubMemberAccessToken = process.env.GITHUB_ACCESS_TOKEN_MEMBER;
+  global.githubCollabAccessToken = process.env.GITHUB_ACCESS_TOKEN_COLLAB;
 
   global.suAdapter = new ShippableAdapter(process.env.SHIPPABLE_API_TOKEN);
   global.pubAdapter = new ShippableAdapter(''); // init public adapter
 
   // setup any more data needed for tests below
   global.ownerProjectsNum = 1;
-  global.GITHUB_MEMBER_API_TOKEN_KEY = 'githubMemberApiToken';
+  global.GITHUB_COLLAB_API_TOKEN_KEY = 'githubCollabApiToken';
   global.GITHUB_OWNER_API_TOKEN_KEY = 'githubOwnerApiToken';
 
   global.GHC_OWNER_PRIVATE_PROJ = 'testprivate';
-  global.GHC_MEMBER_PRIVATE_PROJ = 'testprivate';
+  global.GHC_COLLAB_PRIVATE_PROJ = 'testprivate';
 }
 
 // if no param given, it reads from nconf
-global.setupGithubMemberAdapter = function (apiToken) {
+global.setupGithubCollabAdapter = function (apiToken) {
   nconf.file(global.resourcePath);
   nconf.load();
   if (apiToken) {
-    nconf.set(global.GITHUB_MEMBER_API_TOKEN_KEY, apiToken);
+    nconf.set(global.GITHUB_COLLAB_API_TOKEN_KEY, apiToken);
     nconf.save(
       function (err) {
         if (err) {
@@ -51,10 +51,10 @@ global.setupGithubMemberAdapter = function (apiToken) {
       }
     );
   } else {
-    apiToken = nconf.get(global.GITHUB_MEMBER_API_TOKEN_KEY);
+    apiToken = nconf.get(global.GITHUB_COLLAB_API_TOKEN_KEY);
   }
 
-  global.ghcMemberAdapter = new ShippableAdapter(apiToken);
+  global.ghcCollabAdapter = new ShippableAdapter(apiToken);
 };
 
 // if no param given, it reads from nconf

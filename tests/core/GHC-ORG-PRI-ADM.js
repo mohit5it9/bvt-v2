@@ -6,7 +6,7 @@ var projectId = null;
 
 var testSuite = 'GHC-ORG-PRI-ADM';
 var testSuiteDesc = '- TestSuite for Github Organization, Private project for' +
-  'Admin';
+  ' Admin';
 
 describe(testSuite + testSuiteDesc,
   function () {

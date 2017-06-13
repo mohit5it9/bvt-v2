@@ -1,6 +1,6 @@
 'use strict';
 
-// login tests for member
+// login tests for collab
 
 var setupTests = require('../../_common/setupTests.js');
 
@@ -8,8 +8,8 @@ var account = {};
 var githubSysIntId = null;
 var backoff = require('backoff');
 
-var testSuite = 'ACCT-GHC-MEM-IND';
-var testSuiteDesc = '- TestCases for Github Member for login';
+var testSuite = 'ACCT-GHC-COL-IND';
+var testSuiteDesc = '- TestCases for Github Collab for login';
 
 describe(testSuite + testSuiteDesc,
   function () {
@@ -38,7 +38,7 @@ describe(testSuite + testSuiteDesc,
     it('1. Login should generate API token',
       function (done) {
         var json = {
-          accessToken: global.githubMemberAccessToken
+          accessToken: global.githubCollabAccessToken
         };
         global.pubAdapter.postAuth(githubSysIntId, json,
           function (err, body, res) {
@@ -48,9 +48,9 @@ describe(testSuite + testSuiteDesc,
             assert.isNotEmpty(body, 'body should not be null');
             assert.isNotNull(body.apiToken, 'API token should not be null');
 
-            account.githubMemberAccessToken = body.apiToken;
-            account.memberId = body.account.id;
-            global.setupGithubMemberAdapter(body.apiToken);
+            account.githubCollabAccessToken = body.apiToken;
+            account.collabId = body.account.id;
+            global.setupGithubCollabAdapter(body.apiToken);
 
             return done(err);
           }
@@ -62,7 +62,7 @@ describe(testSuite + testSuiteDesc,
       function () {
         var accountSynced = new Promise(
           function (resolve, reject) {
-            var query = util.format('accountIds=%s', account.memberId);
+            var query = util.format('accountIds=%s', account.collabId);
 
             var expBackoff = backoff.exponential({
               initialDelay: 100, // ms
@@ -118,7 +118,7 @@ describe(testSuite + testSuiteDesc,
       function () {
         var getProjects = new Promise(
           function (resolve, reject) {
-            global.ghcMemberAdapter.getProjects('',
+            global.ghcCollabAdapter.getProjects('',
               function (err, projects) {
                 if (err)
                   return reject(new Error('Unable to get projects with error',
@@ -142,7 +142,7 @@ describe(testSuite + testSuiteDesc,
       function () {
         var getSubs = new Promise(
           function (resolve, reject) {
-            global.ghcMemberAdapter.getSubscriptions('',
+            global.ghcCollabAdapter.getSubscriptions('',
               function (err, projects) {
                 if (err)
                   return reject(new Error('Unable to get subs with error',
@@ -168,8 +168,8 @@ describe(testSuite + testSuiteDesc,
         global.saveResource(
           {
             type: 'account',
-            id: account.memberId,
-            apiToken: account.githubMemberApiToken
+            id: account.collabId,
+            apiToken: account.githubCollabApiToken
           },
           function () {
             return done();

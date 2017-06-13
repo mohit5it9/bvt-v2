@@ -4,9 +4,9 @@ var setupTests = require('../../_common/setupTests.js');
 
 var projectId = null;
 
-var testSuite = 'GHC-ORG-PRI-MEM';
+var testSuite = 'GHC-ORG-PRI-COL';
 var testSuiteDesc = '- TestSuite for Github Organization, Private project for' +
-  'Member';
+  ' Collab';
 
 describe(testSuite + testSuiteDesc,
   function () {
@@ -14,10 +14,10 @@ describe(testSuite + testSuiteDesc,
     before(
       function (done) {
         setupTests();
-        global.setupGithubMemberAdapter();
+        global.setupGithubCollabAdapter();
         // get private project before starting the tests
-        var query = util.format('name=%s', global.GHC_MEMBER_PRIVATE_PROJ);
-        global.ghcMemberAdapter.getProjects(query,
+        var query = util.format('name=%s', global.GHC_COLLAB_PRIVATE_PROJ);
+        global.ghcCollabAdapter.getProjects(query,
           function (err, projects) {
             if (err || _.isEmpty(projects))
               return done(new Error(util.format('cannot get project for ' +
@@ -36,7 +36,7 @@ describe(testSuite + testSuiteDesc,
         var json = {
           type: 'ci'
         };
-        global.ghcMemberAdapter.enableProjectById(projectId, json,
+        global.ghcCollabAdapter.enableProjectById(projectId, json,
           function (err) {
             if (err)
               return done(new Error(util.format('cannot enable private ' +
@@ -52,7 +52,7 @@ describe(testSuite + testSuiteDesc,
       function () {
         var projectSynced = new Promise(
           function (resolve, reject) {
-            global.ghcMemberAdapter.syncProjectById(projectId,
+            global.ghcCollabAdapter.syncProjectById(projectId,
               function (err, project) {
                 if (err)
                   return reject(new Error(util.format('Failed to sync project' +
@@ -77,7 +77,7 @@ describe(testSuite + testSuiteDesc,
         var pauseProject = new Promise(
           function (resolve, reject) {
             var json = {propertyBag: {isPaused: true}};
-            global.ghcMemberAdapter.putProjectById(projectId, json,
+            global.ghcCollabAdapter.putProjectById(projectId, json,
               function (err, project) {
                 if (err)
                   return reject(new Error('Cannot pause project'));
@@ -103,7 +103,7 @@ describe(testSuite + testSuiteDesc,
         var pauseProject = new Promise(
           function (resolve, reject) {
             var json = {propertyBag: {isPaused: false}};
-            global.ghcMemberAdapter.putProjectById(projectId, json,
+            global.ghcCollabAdapter.putProjectById(projectId, json,
               function (err, project) {
                 if (err)
                   return reject(new Error(util.format('Cannot resume project' +
@@ -129,7 +129,7 @@ describe(testSuite + testSuiteDesc,
     after(
       function (done) {
         // delete project
-        global.ghcMemberAdapter.deleteProjectById(projectId, {},
+        global.ghcCollabAdapter.deleteProjectById(projectId, {},
           function (err) {
             if (err) {
               logger.warn(testSuite, 'Cleanup - failed to delete the project');
