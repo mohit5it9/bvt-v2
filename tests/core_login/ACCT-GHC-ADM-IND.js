@@ -1,6 +1,6 @@
 'use strict';
 
-var setupTests = require('../_common/setupTests.js');
+var setupTests = require('../../_common/setupTests.js');
 
 var account = {};
 var githubSysIntId = null;
