@@ -34,8 +34,10 @@ function setupTests() {
   global.GITHUB_MEMBER_API_TOKEN_KEY = 'githubMemberApiToken';
   global.GITHUB_OWNER_API_TOKEN_KEY = 'githubOwnerApiToken';
 
+  global.GITHUB_ORG_NAME = 'shiptest-github-organization-1';
+
   global.GHC_MEMBER_PRIVATE_PROJ = 'testprivate';
-  global.GHC_COLLAB_PRIVATE_PROJ = 'shiptest_org_private_project_1';
+  global.GHC_COLLAB_PRIVATE_PROJ = 'testprivate';
   global.GHC_OWNER_PRIVATE_PROJ = 'shiptest_org_private_project_1';
 }
 
