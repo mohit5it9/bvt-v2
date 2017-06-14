@@ -6,8 +6,8 @@ var account = {};
 var githubSysIntId = null;
 var backoff = require('backoff');
 
-var testSuite = 'ACCT-GHC-ADM-IND';
-var testSuiteDesc = '- TestCases for Github Admin for login';
+var testSuite = 'ACCT-GHC-MEM-IND';
+var testSuiteDesc = '- TestCases for Individual Github Member for login';
 
 describe(testSuite + testSuiteDesc,
   function () {
@@ -36,7 +36,7 @@ describe(testSuite + testSuiteDesc,
     it('1. Login should generate API token',
       function (done) {
         var json = {
-          accessToken: global.githubOwnerAccessToken
+          accessToken: global.githubMemberAccessToken
         };
         global.pubAdapter.postAuth(githubSysIntId, json,
           function (err, body, res) {
@@ -45,9 +45,9 @@ describe(testSuite + testSuiteDesc,
             assert.isNotEmpty(body, 'body should not be null');
             assert.isNotNull(body.apiToken, 'API token should not be null');
 
-            account.githubOwnerApiToken = body.apiToken;
-            account.ownerId = body.account.id;
-            global.setupGithubOwnerAdapter(body.apiToken);
+            account.githubMemberApiToken = body.apiToken;
+            account.memberId = body.account.id;
+            global.setupGithubMemberAdapter(body.apiToken);
 
             return done(err);
           }
@@ -59,7 +59,7 @@ describe(testSuite + testSuiteDesc,
       function () {
         var accountSynced = new Promise(
           function (resolve, reject) {
-            var query = util.format('accountIds=%s', account.ownerId);
+            var query = util.format('accountIds=%s', account.memberId);
 
             var expBackoff = backoff.exponential({
               initialDelay: 100, // ms
@@ -115,7 +115,7 @@ describe(testSuite + testSuiteDesc,
       function () {
         var getProjects = new Promise(
           function (resolve, reject) {
-            global.ghcOwnerAdapter.getProjects('',
+            global.ghcMemberAdapter.getProjects('',
               function (err, projects) {
                 if (err)
                   return reject(new Error('Unable to get projects with error',
@@ -139,7 +139,7 @@ describe(testSuite + testSuiteDesc,
       function () {
         var getSubs = new Promise(
           function (resolve, reject) {
-            global.ghcOwnerAdapter.getSubscriptions('',
+            global.ghcMemberAdapter.getSubscriptions('',
               function (err, subs) {
                 if (err)
                   return reject(new Error('Unable to get subs with error',
@@ -165,8 +165,8 @@ describe(testSuite + testSuiteDesc,
         global.saveResource(
           {
             type: 'account',
-            id: account.ownerId,
-            apiToken: account.githubOwnerApiToken
+            id: account.memberId,
+            apiToken: account.githubMemberApiToken
           },
           function () {
             return done();

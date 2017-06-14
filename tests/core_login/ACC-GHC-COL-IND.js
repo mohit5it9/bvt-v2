@@ -42,7 +42,6 @@ describe(testSuite + testSuiteDesc,
         };
         global.pubAdapter.postAuth(githubSysIntId, json,
           function (err, body, res) {
-            assert.strictEqual(err, null, 'Error should be null');
             assert.isNotEmpty(res, 'Result should not be empty');
             assert.strictEqual(res.statusCode, 200, 'statusCode should be 200');
             assert.isNotEmpty(body, 'body should not be null');
@@ -85,7 +84,7 @@ describe(testSuite + testSuiteDesc,
                         err));
 
                     var account = _.first(accounts);
-                    if (!!account.isSyncing || !account.lastSyncStartDate) {
+                    if (account.isSyncing !== false || !account.lastSyncStartDate) {
                       expBackoff.backoff();
                     } else {
                       expBackoff.reset();
