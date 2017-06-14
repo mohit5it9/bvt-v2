@@ -129,23 +129,24 @@ describe(testSuite + testSuiteDesc,
     after(
       function (done) {
         // delete project
-        global.ghcOwnerAdapter.deleteProjectById(projectId, {},
-          function (err) {
-            if (err) {
-              logger.warn(testSuite, 'Cleanup - failed to delete the project');
-              global.saveResource(
-                {
-                  type: 'project',
-                  id: projectId
-                },
+        if (projectId)
+          global.ghcOwnerAdapter.deleteProjectById(projectId, {},
+            function (err) {
+              if (err) {
+                logger.warn(testSuite, 'Cleanup-failed to delete the project');
+                global.saveResource(
+                  {
+                    type: 'project',
+                    id: projectId
+                  },
                 function () {
                   return done();
                 }
               );
-            } else {
-              return done();
+              } else {
+                return done();
+              }
             }
-          }
         );
       }
     );
