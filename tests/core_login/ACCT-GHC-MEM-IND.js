@@ -166,7 +166,8 @@ describe(testSuite + testSuiteDesc,
           {
             type: 'account',
             id: account.memberId,
-            apiToken: account.githubMemberApiToken
+            apiToken: account.githubMemberApiToken,
+            role: 'member'
           },
           function () {
             return done();
