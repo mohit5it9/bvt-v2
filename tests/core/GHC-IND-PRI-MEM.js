@@ -142,10 +142,10 @@ describe(testSuite + testSuiteDesc,
 
             // try resume if enable is success
             global.ghcMemberAdapter.putProjectById(projectId, json,
-              function (err) {
-                if (!err)
+              function (e) {
+                if (!e)
                   return done(util.format('Member cannot resume project' +
-                  'id: %s, err: %s', projectId, err));
+                  'id: %s, err: %s', projectId, e));
                 return done();
               }
             );

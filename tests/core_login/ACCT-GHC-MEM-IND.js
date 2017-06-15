@@ -81,13 +81,13 @@ describe(testSuite + testSuiteDesc,
                       return reject(new Error('Failed to get account with err',
                         err));
 
-                    var account = _.first(accounts);
-                    if (account.isSyncing !== false ||
-                      !account.lastSyncStartDate) {
+                    var acc = _.first(accounts);
+                    if (acc.isSyncing !== false ||
+                      !acc.lastSyncStartDate) {
                       expBackoff.backoff();
                     } else {
                       expBackoff.reset();
-                      return resolve(account);
+                      return resolve(acc);
                     }
                   }
                 );
@@ -105,8 +105,8 @@ describe(testSuite + testSuiteDesc,
           }
         );
         return accountSynced.then(
-          function (account) {
-            assert.isNotEmpty(account, 'account should not be empty');
+          function (acc) {
+            assert.isNotEmpty(acc, 'account should not be empty');
           }
         );
       }

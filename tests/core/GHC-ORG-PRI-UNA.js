@@ -55,8 +55,8 @@ describe(testSuite + testSuiteDesc,
             assert(!err, 'should be able to enable the project');
 
             global.pubAdapter.syncProjectById(projectId,
-              function (err) {
-                assert.strictEqual(err, 404,
+              function (e) {
+                assert.strictEqual(e, 404,
                   'public user should not be able to sync a project');
                 return done();
               }
@@ -90,8 +90,8 @@ describe(testSuite + testSuiteDesc,
 
             json = {propertyBag: {isPaused: false}};
             global.pubAdapter.putProjectById(projectId, json,
-              function (err) {
-                assert.strictEqual(err, 401,
+              function (e) {
+                assert.strictEqual(e, 401,
                   'public user should not be able to resume a project');
                 return done();
               }
