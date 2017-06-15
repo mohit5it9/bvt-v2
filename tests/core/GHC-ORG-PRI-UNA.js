@@ -52,9 +52,9 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         // enable a project first
         var json = {type: 'ci'};
-        global.suAdapter.enableProjectById(projectId, json,
+        global.ghcAdminAdapter.enableProjectById(projectId, json,
           function (err) {
-            assert(!err, 'should be able to enable the project');
+            assert(!err, 'admin should be able to enable the project');
 
             global.pubAdapter.syncProjectById(projectId,
               function (e) {
@@ -86,9 +86,9 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         // first enable using su adapter
         var json = {propertyBag: {isPaused: true}};
-        global.suAdapter.putProjectById(projectId, json,
+        global.ghcAdminAdapter.putProjectById(projectId, json,
           function (err) {
-            assert(!err, 'suAdapter unable be able to pause project');
+            assert(!err, 'admin unable be able to pause project');
 
             json = {propertyBag: {isPaused: false}};
             global.pubAdapter.putProjectById(projectId, json,
