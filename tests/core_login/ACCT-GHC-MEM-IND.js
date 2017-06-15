@@ -82,7 +82,8 @@ describe(testSuite + testSuiteDesc,
                         err));
 
                     var account = _.first(accounts);
-                    if (account.isSyncing !== false || !account.lastSyncStartDate) {
+                    if (account.isSyncing !== false ||
+                      !account.lastSyncStartDate) {
                       expBackoff.backoff();
                     } else {
                       expBackoff.reset();

@@ -121,7 +121,7 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         var json = {propertyBag: {isPaused: true}};
         global.ghcMemberAdapter.putProjectById(projectId, json,
-          function (err, project) {
+          function (err) {
             if (!err)
               return done('shouldnt be able to pause project');
             return done();
@@ -135,14 +135,14 @@ describe(testSuite + testSuiteDesc,
         // first enable using su adapter
         var json = {propertyBag: {isPaused: true}};
         global.suAdapter.putProjectById(projectId, json,
-          function (err, project) {
+          function (err) {
             if (err)
               return done('suAdapter unable be able to pause project');
             json = {propertyBag: {isPaused: false}};
 
             // try resume if enable is success
             global.ghcMemberAdapter.putProjectById(projectId, json,
-              function (err, project) {
+              function (err) {
                 if (!err)
                   return done(util.format('Member cannot resume project' +
                   'id: %s, err: %s', projectId, err));

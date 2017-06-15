@@ -23,7 +23,6 @@ describe(testSuite + testSuiteDesc,
               return done(new Error(util.format('cannot get project for ' +
                 'query: %s, Err: %s', query, err)));
             var project = _.first(projects);
-            logger.info(testSuite, 'enabling project with id:', project.id);
             projectId = project.id;
             return done();
           }
