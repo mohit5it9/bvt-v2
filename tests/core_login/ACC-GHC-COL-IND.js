@@ -47,7 +47,7 @@ describe(testSuite + testSuiteDesc,
             assert.isNotEmpty(body, 'body should not be null');
             assert.isNotNull(body.apiToken, 'API token should not be null');
 
-            account.githubCollabAccessToken = body.apiToken;
+            account.githubCollabApiToken = body.apiToken;
             account.collabId = body.account.id;
             global.setupGithubCollabAdapter(body.apiToken);
 
