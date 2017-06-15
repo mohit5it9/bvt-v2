@@ -12,24 +12,32 @@ var testSuiteDesc = '- TestCases for Github Admin for login';
 describe(testSuite + testSuiteDesc,
   function () {
     this.timeout(0);
+
     before(
       function (done) {
-        setupTests();
-        var query = 'masterName=githubKeys&name=auth';
-        global.suAdapter.getSystemIntegrations(query,
-          function (err, systemIntegrations) {
-            if (err) {
-              assert.isNotOk(err, 'get Github sysInt failed with err');
-              return done(true);
-            }
+        setupTests().then(
+          function () {
+            var query = 'masterName=githubKeys&name=auth';
+            global.suAdapter.getSystemIntegrations(query,
+              function (err, systemIntegrations) {
+                if (err) {
+                  assert.isNotOk(err, 'get Github sysInt failed with err');
+                  return done(true);
+                }
 
-            var gitSysInt = _.first(systemIntegrations);
-            assert.isOk(gitSysInt, 'No system integration found for github');
-            assert.isOk(gitSysInt.id, 'Github sysIntId should be present');
-            githubSysIntId = gitSysInt.id;
-            return done();
+                var gitSysInt = _.first(systemIntegrations);
+                assert.isOk(gitSysInt, 'No system integration found for github');
+                assert.isOk(gitSysInt.id, 'Github sysIntId should be present');
+                githubSysIntId = gitSysInt.id;
+                return done();
+              }
+            );
           }
         );
+      },
+      function (err) {
+        logger.error(testSuite, 'failed to setup tests. err:', err);
+        return done(err);
       }
     );
 

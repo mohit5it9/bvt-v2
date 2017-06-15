@@ -1,6 +1,7 @@
 'use strict';
 
 var setupTests = require('../../_common/setupTests.js');
+var backoff = require('backoff');
 
 var projectId = null;
 var runId = null;
@@ -12,20 +13,28 @@ var testSuiteDesc = '- TestSuite for Github Organization, Private project for' +
 describe(testSuite + testSuiteDesc,
   function () {
     this.timeout(0);
+
     before(
       function (done) {
-        setupTests();
-        global.setupGithubAdminAdapter();
-        // get private project before starting the tests
-        var query = util.format('name=%s', global.GHC_OWNER_PRIVATE_PROJ);
-        global.ghcAdminAdapter.getProjects(query,
-          function (err, projects) {
-            if (err || _.isEmpty(projects))
-              return done(new Error(util.format('cannot get project for ' +
-                'query: %s, Err: %s', query, err)));
-            var project = _.first(projects);
-            projectId = project.id;
-            return done();
+        setupTests().then(
+          function () {
+            global.setupGithubAdminAdapter();
+            // get private project before starting the tests
+            var query = util.format('name=%s', global.GHC_OWNER_PRIVATE_PROJ);
+            global.ghcAdminAdapter.getProjects(query,
+              function (err, projects) {
+                if (err || _.isEmpty(projects))
+                  return done(new Error(util.format('cannot get project for ' +
+                    'query: %s, Err: %s', query, err)));
+                var project = _.first(projects);
+                projectId = project.id;
+                return done();
+              }
+            );
+          },
+          function (err) {
+            logger.error(testSuite, 'failed to setup tests. err:', err);
+            return done(err);
           }
         );
       }
@@ -127,14 +136,67 @@ describe(testSuite + testSuiteDesc,
 
     it('5. Can trigger manual builds',
       function (done) {
-        var json = {type: 'push'};
-        global.ghcAdminAdapter.triggerNewBuildByProjectId(projectId, json,
-          function (err, response) {
-            if (err)
-              return done(new Error(util.format('Cannot trigger manual build for ' +
-                'project id: %s, err: %s', projectId, err)));
+        var triggerBuild = new Promise(
+          function (resolve, reject) {
+            var json = {type: 'push'};
+            global.ghcAdminAdapter.triggerNewBuildByProjectId(projectId, json,
+              function (err, response) {
+                if (err)
+                  return reject(new Error(util.format('Cannot trigger manual build for ' +
+                    'project id: %s, err: %s', projectId, err)));
+                
+                return resolve(response);
+              }
+            );
+          }
+        );
+        triggerBuild.then(
+          function (response) {
             runId = response.runId;
-            return done();
+
+            var expBackoff = backoff.exponential({
+              initialDelay: 100, // ms
+              maxDelay: 1000 // max retry interval of 1 second
+            });
+            expBackoff.failAfter(30); // fail after 30 attempts
+            expBackoff.on('backoff',
+              function (number, delay) {
+                logger.info('Run with id:', runId, ' not yet in processing. Retrying after ', delay, ' ms');
+              }
+            );
+
+            expBackoff.on('ready',
+              function () {
+                global.ghcAdminAdapter.getRunById(runId,
+                  function (err, run) {
+                    if (err)
+                      return done(new Error('Failed to get run id: %s with err,',
+                        runId, err));
+
+                    var processingStatusCode = _.findWhere(global.systemCodes,
+                      {group: 'statusCodes', name: 'PROCESSING'}).code;
+                    if (run.statusCode === processingStatusCode) {
+                      expBackoff.backoff();
+                    } else {
+                      expBackoff.reset();
+                      return done();
+                    }
+                  }
+                );
+              }
+            );
+
+            // max number of backoffs reached
+            expBackoff.on('fail',
+              function () {
+                return done(new Error('Max number of backoffs reached'));
+              }
+            );
+
+            expBackoff.backoff();
+          },
+          function (err) {
+            return done(err);
           }
         );
       }
@@ -186,18 +248,45 @@ describe(testSuite + testSuiteDesc,
     it('9. Can download logs',
       function (done) {
         var bag = {
-          runId: runId
+          runId: runId,
+          logs: []
         };
         async.series([
             getJobs.bind(null, bag),
             getLogs.bind(null, bag)
           ],
           function (err) {
+            assert.isNotEmpty(bag.logs, 'logs not found');
             return done(err);
           }
         );
       }
     );
+
+    function getJobs(bag, next) {
+      var query = util.format('runIds=%s', bag.runId);
+      global.ghcAdminAdapter.getJobs(query,
+        function (err, response) {
+          if (err || _.isEmpty(response))
+            return next(new Error(util.format('Cannot find jobs for run' +
+              ' id: %s, err: %s', bag.runId, err)));
+          bag.jobId = _.first(_.pluck(response, 'id'));
+          return next();
+        }
+      );
+    }
+
+    function getLogs(bag, next) {
+      global.ghcAdminAdapter.getJobConsolesByJobId(bag.jobId, '',
+        function (err, response) {
+          if (err)
+            return next(new Error(util.format('Cannot get consoles for job id: %s' +
+              ', err: %s', bag.jobId, err)));
+          bag.logs = response;
+          return next();
+        }
+      );
+    }
 
     it('10. Can Reset a private project',
       function (done) {
@@ -254,27 +343,3 @@ describe(testSuite + testSuiteDesc,
     );
   }
 );
-
-function getJobs(bag, next) {
-  var query = util.format('runIds=%s', bag.runId);
-  global.ghcAdminAdapter.getJobs(query,
-    function (err, response) {
-      if (err || _.isEmpty(response))
-        return next(new Error(util.format('Cannot find jobs for run' +
-          ' id: %s, err: %s', bag.runId, err)));
-      bag.jobId = _.first(_.pluck(response, 'id'));
-      return next();
-    }
-  );
-}
-
-function getLogs(bag, next) {
-  global.ghcAdminAdapter.getJobConsolesByJobId(bag.jobId, '',
-    function (err, response) {
-      if (err)
-        return next(new Error(util.format('Cannot get consoles for job id: %s' +
-          ', err: %s', bag.jobId, err)));
-      return next();
-    }
-  );
-}

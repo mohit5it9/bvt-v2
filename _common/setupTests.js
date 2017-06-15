@@ -15,30 +15,62 @@ var ShippableAdapter = require('../_common/shippable/Adapter.js');
 
 // each test starts off as a new process, setup required constants
 function setupTests() {
-  global.config = {};
-  global.TIMEOUT_VALUE = 0;
-  global.config.apiUrl = process.env.SHIPPABLE_API_URL;
-  global.config.githubUrl = 'https://api.github.com';
+  var setupTestsPromise = new Promise(
+    function (resolve, reject) {
+      global.config = {};
+      global.TIMEOUT_VALUE = 0;
+      global.config.apiUrl = process.env.SHIPPABLE_API_URL;
+      global.config.githubUrl = 'https://api.github.com';
 
-  global.resourcePath = process.env.JOB_STATE + '/resources.json';
-  global.githubOwnerAccessToken = process.env.GITHUB_ACCESS_TOKEN_OWNER;
-  global.githubCollabAccessToken = process.env.GITHUB_ACCESS_TOKEN_COLLAB;
-  global.githubMemberAccessToken = process.env.GITHUB_ACCESS_TOKEN_MEMBER;
+      global.resourcePath = process.env.JOB_STATE + '/resources.json';
+      global.githubOwnerAccessToken = process.env.GITHUB_ACCESS_TOKEN_OWNER;
+      global.githubCollabAccessToken = process.env.GITHUB_ACCESS_TOKEN_COLLAB;
+      global.githubMemberAccessToken = process.env.GITHUB_ACCESS_TOKEN_MEMBER;
 
-  global.suAdapter = new ShippableAdapter(process.env.SHIPPABLE_API_TOKEN);
-  global.pubAdapter = new ShippableAdapter(''); // init public adapter
+      global.suAdapter = new ShippableAdapter(process.env.SHIPPABLE_API_TOKEN);
+      global.pubAdapter = new ShippableAdapter(''); // init public adapter
 
-  // setup any more data needed for tests below
-  global.ownerProjectsNum = 1;
-  global.GITHUB_COLLAB_API_TOKEN_KEY = 'githubCollabApiToken';
-  global.GITHUB_MEMBER_API_TOKEN_KEY = 'githubMemberApiToken';
-  global.GITHUB_OWNER_API_TOKEN_KEY = 'githubOwnerApiToken';
+      global.ownerProjectsNum = 1;
+      global.GITHUB_COLLAB_API_TOKEN_KEY = 'githubCollabApiToken';
+      global.GITHUB_MEMBER_API_TOKEN_KEY = 'githubMemberApiToken';
+      global.GITHUB_OWNER_API_TOKEN_KEY = 'githubOwnerApiToken';
 
-  global.GITHUB_ORG_NAME = 'shiptest-github-organization-1';
+      global.GITHUB_ORG_NAME = 'shiptest-github-organization-1';
 
-  global.GHC_MEMBER_PRIVATE_PROJ = 'testprivate';
-  global.GHC_COLLAB_PRIVATE_PROJ = 'shiptest_org_private_project_1';
-  global.GHC_OWNER_PRIVATE_PROJ = 'shiptest_org_private_project_1';
+      global.GHC_MEMBER_PRIVATE_PROJ = 'testprivate';
+      global.GHC_COLLAB_PRIVATE_PROJ = 'shiptest_org_private_project_1';
+      global.GHC_OWNER_PRIVATE_PROJ = 'shiptest_org_private_project_1';
+
+      var bag = {
+        systemCodes: null
+      };
+      // setup any more data needed for tests below
+      async.parallel([
+          getSystemCodes.bind(null, bag)
+        ],
+        function (err) {
+          if (err)
+            return reject(err);
+
+          global.systemCodes = bag.systemCodes;
+          return resolve();
+        }
+      );
+    }
+  );
+  return setupTestsPromise;
+}
+
+function getSystemCodes(bag, next) {
+  global.suAdapter.getSystemCodes('',
+    function (err, systemCodes) {
+      if (err)
+        return next(err);
+
+      bag.systemCodes = systemCodes;
+      return next();
+    }
+  );
 }
 
 // if no param given, it reads from nconf
