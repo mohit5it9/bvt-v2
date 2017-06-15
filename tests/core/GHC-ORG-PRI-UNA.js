@@ -46,10 +46,9 @@ describe(testSuite + testSuiteDesc,
         var json = {type: 'ci'};
         global.pubAdapter.enableProjectById(projectId, json,
           function (err, project) {
-            if (err)
-              logger.info(testSuite, err, project);
-            assert.strictEqual(err, 401,
-              'public user should not be able to enable private project');
+            assert.strictEqual(err, 401, util.format('public user should ' +
+              ' not be able to enable private project. err : %s %s',
+              err, project));
             return done();
           }
         );
