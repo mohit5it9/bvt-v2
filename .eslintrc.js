@@ -35,6 +35,7 @@ module.exports = {
     "quote-props": ["error", "consistent-as-needed"],
     "no-unused-vars": ["warn"],
     "global-require": ["warn"],
+    "no-shadow": ["warn"],
 
     // rules from airbnb that we won't be using
     "consistent-return": 0,
@@ -50,8 +51,6 @@ module.exports = {
     "one-var": 0,
     // extra rules not present in airbnb
     "max-len": ["error", 80],
-    // airbnb rules that we won't use
-    "no-shadow": 0,
     // custom rules
     "callback-function/on-newline": ["error", "auto-fix"]
   }
