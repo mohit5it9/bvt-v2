@@ -11,9 +11,7 @@ setup_envs() {
 }
 
 core_tests() {
-  exec_container_cmd "npm run doCleanup"
-  exec_container_cmd "npm run test-coreAccountLogin"
-  exec_container_cmd "npm run test-coreTests"
+  exec_container_cmd "npm run start-tests"
 }
 
 main() {

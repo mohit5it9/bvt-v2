@@ -22,7 +22,8 @@ describe(testSuite + testSuiteDesc,
               projects: null
             };
 
-            async.series([
+            async.series(
+              [
                 getSubscription.bind(null, bag),
                 getProject.bind(null, bag)
               ],

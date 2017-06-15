@@ -18,9 +18,7 @@ setupTestEnv() {
 
   pushd $RES_REPO_STATE
   npm install
-  npm run doCleanup
-  npm run test-coreAccountLogin
-  npm run test-coreTests
+  npm run start-tests
   popd
 
   echo "Completed Testing Env setup" $RES_REPO
