@@ -12,22 +12,30 @@ var testSuiteDesc = '- TestSuite for Github Organization, Private project for' +
 describe(testSuite + testSuiteDesc,
   function () {
     this.timeout(0);
+
     before(
       function (done) {
-        setupTests();
-        global.setupGithubAdminAdapter();
-        // get private project for owner before starting the tests
-        var query = util.format('name=%s', global.GHC_OWNER_PRIVATE_PROJ);
-        global.ghcAdminAdapter.getProjects(query,
-          function (err, projects) {
-            if (err || _.isEmpty(projects)) {
-              logger.warn(util.format('cannot get project for ' +
-                'query: %s, Err: %s', query, err));
-              return done(true);
-            }
-            var project = _.first(projects);
-            projectId = project.id;
-            return done();
+        setupTests().then(
+          function () {
+            global.setupGithubAdminAdapter();
+            // get private project for owner before starting the tests
+            var query = util.format('name=%s', global.GHC_OWNER_PRIVATE_PROJ);
+            global.ghcAdminAdapter.getProjects(query,
+              function (err, projects) {
+                if (err || _.isEmpty(projects)) {
+                  logger.warn(util.format('cannot get project for ' +
+                    'query: %s, Err: %s', query, err));
+                  return done(true);
+                }
+                var project = _.first(projects);
+                projectId = project.id;
+                return done();
+              }
+            );
+          },
+          function (err) {
+            logger.error(testSuite, 'failed to setup tests. err:', err);
+            return done(err);
           }
         );
       }

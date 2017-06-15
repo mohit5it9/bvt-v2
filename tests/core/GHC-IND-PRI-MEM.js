@@ -14,27 +14,32 @@ describe(testSuite + testSuiteDesc,
 
     before(
       function (done) {
-        setupTests();
-        global.setupGithubMemberAdapter();
-        global.setupGithubAdminAdapter();
-        var bag = {
-          projects: null
-        };
+        setupTests().then(
+          function () {
+            global.setupGithubMemberAdapter();
+            global.setupGithubAdminAdapter();
+            var bag = {
+              projects: null
+            };
 
-        async.series(
-          [
-            getSubscription.bind(null, bag),
-            getProject.bind(null, bag)
-          ],
+            async.series([
+                getSubscription.bind(null, bag),
+                getProject.bind(null, bag)
+              ],
+              function (err) {
+                if (err) {
+                  logger.error(testSuite, 'failed to setup tests. err:', err);
+                  return done(err);
+                }
+                projectId = bag.projectId;
+                return done();
+              }
+            );
+          },
           function (err) {
-            if (err) {
-              logger.error(testSuite, 'failed to setup tests. err:', err);
-              return done(err);
-            }
-            projectId = bag.projectId;
-            return done();
+            logger.error(testSuite, 'failed to setup tests. err:', err);
+            return done(err);
           }
-
         );
       }
     );
