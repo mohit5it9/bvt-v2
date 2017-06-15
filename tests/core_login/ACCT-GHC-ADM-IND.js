@@ -47,7 +47,7 @@ describe(testSuite + testSuiteDesc,
 
             account.githubOwnerApiToken = body.apiToken;
             account.ownerId = body.account.id;
-            global.setupGithubOwnerAdapter(body.apiToken);
+            global.setupGithubAdminAdapter(body.apiToken);
 
             return done(err);
           }
@@ -115,7 +115,7 @@ describe(testSuite + testSuiteDesc,
       function () {
         var getProjects = new Promise(
           function (resolve, reject) {
-            global.ghcOwnerAdapter.getProjects('',
+            global.ghcAdminAdapter.getProjects('',
               function (err, projects) {
                 if (err)
                   return reject(new Error('Unable to get projects with error',
@@ -139,7 +139,7 @@ describe(testSuite + testSuiteDesc,
       function () {
         var getSubs = new Promise(
           function (resolve, reject) {
-            global.ghcOwnerAdapter.getSubscriptions('',
+            global.ghcAdminAdapter.getSubscriptions('',
               function (err, subs) {
                 if (err)
                   return reject(new Error('Unable to get subs with error',
