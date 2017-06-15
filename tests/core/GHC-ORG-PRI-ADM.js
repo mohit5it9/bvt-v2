@@ -14,10 +14,10 @@ describe(testSuite + testSuiteDesc,
     before(
       function (done) {
         setupTests();
-        global.setupGithubOwnerAdapter();
+        global.setupGithubAdminAdapter();
         // get private project before starting the tests
         var query = util.format('name=%s', global.GHC_OWNER_PRIVATE_PROJ);
-        global.ghcOwnerAdapter.getProjects(query,
+        global.ghcAdminAdapter.getProjects(query,
           function (err, projects) {
             if (err || _.isEmpty(projects))
               return done(new Error(util.format('cannot get project for ' +
@@ -36,7 +36,7 @@ describe(testSuite + testSuiteDesc,
         var json = {
           type: 'ci'
         };
-        global.ghcOwnerAdapter.enableProjectById(projectId, json,
+        global.ghcAdminAdapter.enableProjectById(projectId, json,
           function (err) {
             if (err)
               return done(new Error(util.format('cannot enable private ' +
@@ -52,7 +52,7 @@ describe(testSuite + testSuiteDesc,
       function () {
         var projectSynced = new Promise(
           function (resolve, reject) {
-            global.ghcOwnerAdapter.syncProjectById(projectId,
+            global.ghcAdminAdapter.syncProjectById(projectId,
               function (err, project) {
                 if (err)
                   return reject(new Error(util.format('Failed to sync project' +
@@ -77,7 +77,7 @@ describe(testSuite + testSuiteDesc,
         var pauseProject = new Promise(
           function (resolve, reject) {
             var json = {propertyBag: {isPaused: true}};
-            global.ghcOwnerAdapter.putProjectById(projectId, json,
+            global.ghcAdminAdapter.putProjectById(projectId, json,
               function (err, project) {
                 if (err)
                   return reject(new Error('Cannot pause project'));
@@ -103,7 +103,7 @@ describe(testSuite + testSuiteDesc,
         var pauseProject = new Promise(
           function (resolve, reject) {
             var json = {propertyBag: {isPaused: false}};
-            global.ghcOwnerAdapter.putProjectById(projectId, json,
+            global.ghcAdminAdapter.putProjectById(projectId, json,
               function (err, project) {
                 if (err)
                   return reject(new Error(util.format('Cannot resume project' +
@@ -130,7 +130,7 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         // delete project
         if (projectId)
-          global.ghcOwnerAdapter.deleteProjectById(projectId, {},
+          global.ghcAdminAdapter.deleteProjectById(projectId, {},
             function (err) {
               if (err) {
                 logger.warn(testSuite, 'Cleanup-failed to delete the project');

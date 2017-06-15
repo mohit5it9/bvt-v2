@@ -84,7 +84,7 @@ global.setupGithubCollabAdapter = function (apiToken) {
 };
 
 // if no param given, it reads from nconf
-global.setupGithubOwnerAdapter = function (apiToken) {
+global.setupGithubAdminAdapter = function (apiToken) {
   nconf.file(global.resourcePath);
   nconf.load();
   if (apiToken) {
@@ -101,7 +101,7 @@ global.setupGithubOwnerAdapter = function (apiToken) {
     apiToken = nconf.get(global.GITHUB_OWNER_API_TOKEN_KEY);
   }
 
-  global.ghcOwnerAdapter = new ShippableAdapter(apiToken);
+  global.ghcAdminAdapter = new ShippableAdapter(apiToken);
 };
 
 // NOTE: if state is not forwarded properly in case bvt gets stuck,
