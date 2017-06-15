@@ -37,18 +37,18 @@ function setup() {
 // resources should be saved in following format
 // {resource_type: '', id:''}
 // eg: {resource_type: 'account', id:'5212302983409238042'}
-function deleteResources(resourcesToClean) {
+function deleteResources(resToClean) {
   var who = scriptName + deleteResources.name + '|';
   // reverse so that newer resources are deleted first
-  resourcesToClean.reverse();
+  resToClean.reverse();
 
-  async.eachSeries(resourcesToClean,
+  async.eachSeries(resToClean,
     function (resource, next) {
       deleteResourcesMap[resource.type](resource, next);
     },
     function (err) {
       if (err) {
-        var uncleanResources = _.filter(resourcesToClean,
+        var uncleanResources = _.filter(resToClean,
           function (obj) { return !_.findWhere(deletedResList, obj); }
         );
         var msg = util.format('failed to cleanup resources :( ! Please'
