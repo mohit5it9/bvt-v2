@@ -166,7 +166,8 @@ describe(testSuite + testSuiteDesc,
           {
             type: 'account',
             id: account.ownerId,
-            apiToken: account.githubOwnerApiToken
+            apiToken: account.githubOwnerApiToken,
+            role: 'admin'
           },
           function () {
             return done();

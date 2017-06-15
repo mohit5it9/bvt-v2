@@ -168,7 +168,8 @@ describe(testSuite + testSuiteDesc,
           {
             type: 'account',
             id: account.collabId,
-            apiToken: account.githubCollabApiToken
+            apiToken: account.githubCollabApiToken,
+            role: 'collab'
           },
           function () {
             return done();
