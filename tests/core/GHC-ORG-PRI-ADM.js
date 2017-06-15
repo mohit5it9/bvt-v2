@@ -3,6 +3,7 @@
 var setupTests = require('../../_common/setupTests.js');
 
 var projectId = null;
+var runId = null;
 
 var testSuite = 'GHC-ORG-PRI-ADM';
 var testSuiteDesc = '- TestSuite for Github Organization, Private project for' +
@@ -123,6 +124,108 @@ describe(testSuite + testSuiteDesc,
         );
       }
     );
+
+    it('5. Can trigger manual builds',
+      function (done) {
+        var json = {type: 'push'};
+        global.ghcAdminAdapter.triggerNewBuildByProjectId(projectId, json,
+          function (err, response) {
+            if (err)
+              return done(new Error(util.format('Cannot trigger manual build for ' +
+                'project id: %s, err: %s', projectId, err)));
+            runId = response.runId;
+            return done();
+          }
+        );
+      }
+    );
+
+    it('6. Can view builds',
+      function (done) {
+        var query = util.format('projectIds=%s', projectId);
+        global.ghcAdminAdapter.getRuns(query,
+          function (err, builds) {
+            if (err)
+              return done(new Error(util.format('Cannot get builds for ' +
+                'project id: %s, err: %s', projectId, err)));
+            // check if build triggered in previous test case is present
+            assert.strictEqual(_.contains(_.pluck(builds, 'id'), runId), true);
+            return done();
+          }
+        );
+      }
+    );
+
+    it('7. Can cancel build',
+      function (done) {
+        global.ghcAdminAdapter.cancelRunById(runId,
+          function (err, response) {
+            if (err)
+              return done(new Error(util.format('Cannot cancel build id: %d for ' +
+                'project id: %s, err: %s', runId, projectId, err)));
+            return done();
+          }
+        );
+      }
+    );
+
+    it('8. Can run custom build',
+      function (done) {
+        var json = {type: 'push', globalEnv: {key: 'value'}};
+        global.ghcAdminAdapter.triggerNewBuildByProjectId(projectId, json,
+          function (err, response) {
+            if (err)
+              return done(new Error(util.format('Cannot trigger custom build for ' +
+                'project id: %s, err: %s', projectId, err)));
+            return done();
+          }
+        );
+      }
+    );
+
+    it('9. Can download logs',
+      function (done) {
+        var bag = {
+          runId: runId
+        };
+        async.series([
+            getJobs.bind(null, bag),
+            getLogs.bind(null, bag)
+          ],
+          function (err) {
+            return done(err);
+          }
+        );
+      }
+    );
+
+    it('10. Can Reset a private project',
+      function (done) {
+        var json = {projectId: projectId};
+        global.ghcAdminAdapter.resetProjectById(projectId, json,
+          function (err, response) {
+            if (err)
+              return done(new Error(util.format('Cannot reset project id: %s' +
+                ', err: %s', projectId, err)));
+            return done();
+          }
+        );
+      }
+    );
+
+    it('11. Can Delete a private project',
+      function (done) {
+        var json = {projectId: projectId};
+        global.ghcAdminAdapter.deleteProjectById(projectId, json,
+          function (err, response) {
+            if (err)
+              return done(new Error(util.format('Cannot delete project id: %s' +
+                ', err: %s', projectId, err)));
+            return done();
+          }
+        );
+      }
+    );
     // do cleanup of all the resources. if cleanup fails, resource will
     // be tracked in nconf
     after(
@@ -151,3 +254,27 @@ describe(testSuite + testSuiteDesc,
     );
   }
 );
+
+function getJobs(bag, next) {
+  var query = util.format('runIds=%s', bag.runId);
+  global.ghcAdminAdapter.getJobs(query,
+    function (err, response) {
+      if (err || _.isEmpty(response))
+        return next(new Error(util.format('Cannot find jobs for run' +
+          ' id: %s, err: %s', bag.runId, err)));
+      bag.jobId = _.first(_.pluck(response, 'id'));
+      return next();
+    }
+  );
+}
+
+function getLogs(bag, next) {
+  global.ghcAdminAdapter.getJobConsolesByJobId(bag.jobId, '',
+    function (err, response) {
+      if (err)
+        return next(new Error(util.format('Cannot get consoles for job id: %s' +
+          ', err: %s', bag.jobId, err)));
+      return next();
+    }
+  );
+}
