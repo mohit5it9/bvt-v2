@@ -15,10 +15,10 @@ describe(testSuite + testSuiteDesc,
     before(
       function (done) {
         setupTests();
-        global.setupGithubOwnerAdapter();
+        global.setupGithubAdminAdapter();
         // get private project for owner before starting the tests
         var query = util.format('name=%s', global.GHC_OWNER_PRIVATE_PROJ);
-        global.ghcOwnerAdapter.getProjects(query,
+        global.ghcAdminAdapter.getProjects(query,
           function (err, projects) {
             if (err || _.isEmpty(projects)) {
               logger.warn(util.format('cannot get project for ' +
