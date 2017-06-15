@@ -16,6 +16,7 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         setupTests();
         global.setupGithubMemberAdapter();
+        global.setupGithubAdminAdapter();
         var bag = {
           projects: null
         };
@@ -93,25 +94,23 @@ describe(testSuite + testSuiteDesc,
     );
 
     it('2. Can Synchonize a private project',
-      function () {
-        // TODO: enable a project and then try to sync
-        var projectSynced = new Promise(
-          function (resolve, reject) {
+      function (done) {
+        var json = {type: 'ci'};
+        global.ghcAdminAdapter.enableProjectById(projectId, json,
+          function (err) {
+            assert(!err, util.format('admin should be able to enable the ' +
+              'project got err: %s', err));
+
             global.ghcMemberAdapter.syncProjectById(projectId,
-              function (err, project) {
-                if (err)
-                  return reject(util.format('Failed to sync project' +
-                    '%s with error: %s', projectId, err));
-                return resolve(project);
+              function (e, project) {
+                assert(!err, util.format('Failed to sync project' +
+                    '%s with error: %s, project: %s', projectId, err, project));
+                assert.isNotEmpty(project, 'Project should not be empty');
+                assert.isNotEmpty(project.branches,
+                  'Project should have branches');
+                return done();
               }
             );
-          }
-        );
-        return projectSynced.then(
-          function (project) {
-            // NOTE: can add more assertions here
-            assert.isNotEmpty(project.branches,
-              'Project should have branches');
           }
         );
       }
@@ -134,7 +133,7 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         // first enable using su adapter
         var json = {propertyBag: {isPaused: true}};
-        global.suAdapter.putProjectById(projectId, json,
+        global.ghcAdminAdapter.putProjectById(projectId, json,
           function (err) {
             if (err)
               return done('suAdapter unable be able to pause project');
