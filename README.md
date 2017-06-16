@@ -10,4 +10,4 @@
 
 ## References
 
-[taxnomony wiki] (https://github.com/Shippable/pm/wiki/test-automation-taxonomy)
+* [Taxnomony wiki](https://github.com/Shippable/pm/wiki/test-automation-taxonomy)
