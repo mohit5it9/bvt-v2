@@ -176,7 +176,7 @@ describe(testSuite + testSuiteDesc,
 
                     var processingStatusCode = _.findWhere(global.systemCodes,
                       {group: 'statusCodes', name: 'PROCESSING'}).code;
-                    if (run.statusCode === processingStatusCode) {
+                    if (run.statusCode !== processingStatusCode) {
                       expBackoff.backoff();
                     } else {
                       expBackoff.reset();
