@@ -31,13 +31,16 @@ function startTests() {
           runTests.bind(null, bag)
         ],
         function (err) {
-          if (err)
+          if (err) {
             logger.error('tests finished with errors');
+            process.exit(1);  // make the script fail on errors
+          }
         }
       );
     },
     function (err) {
       logger.error(who, 'Failed to setup tests with error: %s', err);
+      process.exit(1);
     }
   );
 }
@@ -66,8 +69,10 @@ function runTests(bag, next) {
       );
       child.on('close',
         function (code) {
-          if (code > 0)
+          if (code > 0) {
             logger.error(_who, util.format('%s test suites failed', code));
+            return nextTest('some tests failed');
+          }
 
           return nextTest();
         }
