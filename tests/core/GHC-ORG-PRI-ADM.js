@@ -142,9 +142,10 @@ describe(testSuite + testSuiteDesc,
             global.ghcAdminAdapter.triggerNewBuildByProjectId(projectId, json,
               function (err, response) {
                 if (err)
-                  return reject(new Error(util.format('Cannot trigger manual build for ' +
-                    'project id: %s, err: %s', projectId, err)));
-                
+                  return reject(new Error(util.format('Cannot trigger manual ' +
+                    'build for project id: %s, err: %s, %s', projectId, err,
+                    response)));
+
                 return resolve(response);
               }
             );
@@ -161,7 +162,8 @@ describe(testSuite + testSuiteDesc,
             expBackoff.failAfter(30); // fail after 30 attempts
             expBackoff.on('backoff',
               function (number, delay) {
-                logger.info('Run with id:', runId, ' not yet in processing. Retrying after ', delay, ' ms');
+                logger.info('Run with id:', runId, ' not yet in processing. ' +
+                  'Retrying after ', delay, ' ms');
               }
             );
 
@@ -170,7 +172,7 @@ describe(testSuite + testSuiteDesc,
                 global.ghcAdminAdapter.getRunById(runId,
                   function (err, run) {
                     if (err)
-                      return done(new Error('Failed to get run id: %s with err,',
+                      return done(new Error('Failed to get run id: %s, err:',
                         runId, err));
 
                     var processingStatusCode = _.findWhere(global.systemCodes,
@@ -223,8 +225,9 @@ describe(testSuite + testSuiteDesc,
         global.ghcAdminAdapter.cancelRunById(runId,
           function (err, response) {
             if (err)
-              return done(new Error(util.format('Cannot cancel build id: %d for ' +
-                'project id: %s, err: %s', runId, projectId, err)));
+              return done(new Error(util.format('Cannot cancel build id: %d ' +
+                'for project id: %s, err: %s, %s', runId, projectId, err,
+                response)));
             return done();
           }
         );
@@ -237,8 +240,8 @@ describe(testSuite + testSuiteDesc,
         global.ghcAdminAdapter.triggerNewBuildByProjectId(projectId, json,
           function (err, response) {
             if (err)
-              return done(new Error(util.format('Cannot trigger custom build for ' +
-                'project id: %s, err: %s', projectId, err)));
+              return done(new Error(util.format('Cannot trigger custom build ' +
+                'for project id: %s, err: %s, %s', projectId, err, response)));
             return done();
           }
         );
@@ -252,9 +255,9 @@ describe(testSuite + testSuiteDesc,
           logs: []
         };
         async.series([
-            getJobs.bind(null, bag),
-            getLogs.bind(null, bag)
-          ],
+          getJobs.bind(null, bag),
+          getLogs.bind(null, bag)
+        ],
           function (err) {
             assert.isNotEmpty(bag.logs, 'logs not found');
             return done(err);
@@ -280,8 +283,8 @@ describe(testSuite + testSuiteDesc,
       global.ghcAdminAdapter.getJobConsolesByJobId(bag.jobId, '',
         function (err, response) {
           if (err)
-            return next(new Error(util.format('Cannot get consoles for job id: %s' +
-              ', err: %s', bag.jobId, err)));
+            return next(new Error(util.format('Cannot get consoles for ' +
+              'job id: %s, err: %s', bag.jobId, err)));
           bag.logs = response;
           return next();
         }
@@ -295,7 +298,7 @@ describe(testSuite + testSuiteDesc,
           function (err, response) {
             if (err)
               return done(new Error(util.format('Cannot reset project id: %s' +
-                ', err: %s', projectId, err)));
+                ', err: %s, %s', projectId, err, response)));
             return done();
           }
         );
@@ -309,7 +312,7 @@ describe(testSuite + testSuiteDesc,
           function (err, response) {
             if (err)
               return done(new Error(util.format('Cannot delete project id: %s' +
-                ', err: %s', projectId, err)));
+                ', err: %s, %s', projectId, err, response)));
             return done();
           }
         );

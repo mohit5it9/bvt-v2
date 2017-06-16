@@ -1,8 +1,10 @@
 'use strict';
 
 var setupTests = require('../../_common/setupTests.js');
+var backoff = require('backoff');
 
 var projectId = null;
+var runId = null;
 
 var testSuite = 'GHC-ORG-PRI-COL';
 var testSuiteDesc = '- TestSuite for Github Organization, Private project for' +
@@ -127,6 +129,189 @@ describe(testSuite + testSuiteDesc,
               + 'empty');
             assert.strictEqual(project.propertyBag.isPaused, false,
               'isPaused should be set to false');
+          }
+        );
+      }
+    );
+
+    it('5. Can trigger manual builds',
+      function (done) {
+        var triggerBuild = new Promise(
+          function (resolve, reject) {
+            var json = {type: 'push'};
+            global.ghcCollabAdapter.triggerNewBuildByProjectId(projectId, json,
+              function (err, response) {
+                if (err)
+                  return reject(new Error(util.format('Cannot trigger manual ' +
+                    'build for project id: %s, err: %s', projectId, err)));
+
+                return resolve(response);
+              }
+            );
+          }
+        );
+        triggerBuild.then(
+          function (response) {
+            runId = response.runId;
+
+            var expBackoff = backoff.exponential({
+              initialDelay: 100, // ms
+              maxDelay: 1000 // max retry interval of 1 second
+            });
+            expBackoff.failAfter(30); // fail after 30 attempts
+            expBackoff.on('backoff',
+              function (number, delay) {
+                logger.info('Run with id:', runId, ' not yet in processing. ' +
+                  'Retrying after ', delay, ' ms');
+              }
+            );
+
+            expBackoff.on('ready',
+              function () {
+                global.ghcCollabAdapter.getRunById(runId,
+                  function (err, run) {
+                    if (err)
+                      return done(new Error('Failed to get run id: %s, err:',
+                        runId, err));
+
+                    var processingStatusCode = _.findWhere(global.systemCodes,
+                      {group: 'statusCodes', name: 'PROCESSING'}).code;
+                    if (run.statusCode === processingStatusCode) {
+                      expBackoff.backoff();
+                    } else {
+                      expBackoff.reset();
+                      return done();
+                    }
+                  }
+                );
+              }
+            );
+
+            // max number of backoffs reached
+            expBackoff.on('fail',
+              function () {
+                return done(new Error('Max number of backoffs reached'));
+              }
+            );
+
+            expBackoff.backoff();
+          },
+          function (err) {
+            return done(err);
+          }
+        );
+      }
+    );
+
+    it('6. Can view builds',
+      function (done) {
+        var query = util.format('projectIds=%s', projectId);
+        global.ghcCollabAdapter.getRuns(query,
+          function (err, builds) {
+            if (err)
+              return done(new Error(util.format('Cannot get builds for ' +
+                'project id: %s, err: %s', projectId, err)));
+            // check if build triggered in previous test case is present
+            assert.strictEqual(_.contains(_.pluck(builds, 'id'), runId), true);
+            return done();
+          }
+        );
+      }
+    );
+
+    it('7. Can cancel build',
+      function (done) {
+        global.ghcCollabAdapter.cancelRunById(runId,
+          function (err, response) {
+            if (err)
+              return done(new Error(util.format('Cannot cancel build id: %d ' +
+                'for project id: %s, err: %s, %s', runId, projectId, err,
+                response)));
+            return done();
+          }
+        );
+      }
+    );
+
+    it('8. Can run custom build',
+      function (done) {
+        var json = {type: 'push', globalEnv: {key: 'value'}};
+        global.ghcCollabAdapter.triggerNewBuildByProjectId(projectId, json,
+          function (err, response) {
+            if (err)
+              return done(new Error(util.format('Cannot trigger custom build ' +
+                'for project id: %s, err: %s, %s', projectId, err, response)));
+            return done();
+          }
+        );
+      }
+    );
+
+    it('9. Can download logs',
+      function (done) {
+        var bag = {
+          runId: runId,
+          logs: []
+        };
+        async.series([
+          getJobs.bind(null, bag),
+          getLogs.bind(null, bag)
+        ],
+          function (err) {
+            assert.isNotEmpty(bag.logs, 'logs not found');
+            return done(err);
+          }
+        );
+      }
+    );
+
+    function getJobs(bag, next) {
+      var query = util.format('runIds=%s', bag.runId);
+      global.ghcCollabAdapter.getJobs(query,
+        function (err, response) {
+          if (err || _.isEmpty(response))
+            return next(new Error(util.format('Cannot find jobs for run' +
+              ' id: %s, err: %s', bag.runId, err)));
+          bag.jobId = _.first(_.pluck(response, 'id'));
+          return next();
+        }
+      );
+    }
+
+    function getLogs(bag, next) {
+      global.ghcCollabAdapter.getJobConsolesByJobId(bag.jobId, '',
+        function (err, response) {
+          if (err)
+            return next(new Error(util.format('Cannot get consoles for ' +
+              'job id: %s, err: %s, %s', bag.jobId, err, response)));
+          bag.logs = response;
+          return next();
+        }
+      );
+    }
+
+    it('10. CANNOT Reset a private project',
+      function (done) {
+        var json = {projectId: projectId};
+        global.ghcCollabAdapter.resetProjectById(projectId, json,
+          function (err, response) {
+            assert.strictEqual(err, 404, util.format('Collab should not ' +
+                'reset project id: %s, err: %s, %s', projectId, err, response));
+            return done();
+          }
+        );
+      }
+    );
+
+    it('11. CANNOT Delete a private project',
+      function (done) {
+        var json = {projectId: projectId};
+        global.ghcCollabAdapter.deleteProjectById(projectId, json,
+          function (err, response) {
+            assert.strictEqual(err, 404, util.format('Collab should not ' +
+              'delete project id: %s, err: %s, %s', projectId, err,
+              response));
+            return done();
           }
         );
       }
