@@ -167,7 +167,8 @@ describe(testSuite + testSuiteDesc,
         global.ghcMemberAdapter.triggerNewBuildByProjectId(projectId, json,
           function (err, response) {
             assert.strictEqual(err, 404, util.format('should not trigger ' +
-              'manual build for project id: %s, err: %s', projectId, err));
+              'manual build for project id: %s, err: %s', projectId, err,
+              response));
           }
         );
         // start exp backoff to trigger new build request for other tests

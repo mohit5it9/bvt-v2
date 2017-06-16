@@ -1,3 +1,5 @@
+/* eslint no-console:0 */
+
 'use strict';
 
 var self = startTests;
@@ -53,7 +55,7 @@ function runTests(bag, next) {
   // takes a list of files/ directories for mocha and runs all in series
   var tests = [
     'tests/core_login/*.js',
-    'tests/core/*.js'
+    'tests/core/GHC-IND-PRI-MEM.js'
   ];
   async.eachSeries(tests,
     function (test, nextTest) {
