@@ -230,7 +230,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('9. CANNOT download logs',
+    it('9. CANNOT view consoles',
       function (done) {
         var bag = {
           runId: runId,

@@ -248,7 +248,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('9. Can download logs',
+    it('9. Can view consoles',
       function (done) {
         var bag = {
           runId: runId,
