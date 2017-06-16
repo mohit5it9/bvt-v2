@@ -87,14 +87,15 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    it('1. Can Enable a private project',
+    it('1. CANNOT Enable a private project',
       function (done) {
         var json = {
           type: 'ci'
         };
         global.ghcMemberAdapter.enableProjectById(projectId, json,
-          function (err) {
-            assert.isNotNull(err, 'should throw error');
+          function (err, response) {
+            assert.strictEqual(err, 404, 'member cannot enable a project, err:',
+              err, response);
             return done();
           }
         );
@@ -124,20 +125,20 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('3. Can pause a private project',
+    it('3. CANNOT pause a private project',
       function (done) {
         var json = {propertyBag: {isPaused: true}};
         global.ghcMemberAdapter.putProjectById(projectId, json,
-          function (err) {
-            if (!err)
-              return done('shouldnt be able to pause project');
+          function (err, response) {
+            assert.strictEqual(err, 404, 'member shouldnt be able to pause ' +
+              'project, err: %s', err, response);
             return done();
           }
         );
       }
     );
 
-    it('4. Can resume a private project',
+    it('4. CANNOT resume a private project',
       function (done) {
         // first enable using su adapter
         var json = {propertyBag: {isPaused: true}};
@@ -149,10 +150,9 @@ describe(testSuite + testSuiteDesc,
 
             // try resume if enable is success
             global.ghcMemberAdapter.putProjectById(projectId, json,
-              function (e) {
-                if (!e)
-                  return done(util.format('Member cannot resume project' +
-                  'id: %s, err: %s', projectId, e));
+              function (e, response) {
+                assert.strictEqual(e, 404, util.format('Member cannot ' +
+                  'resume projectId: %s, err: %s', projectId, e, response));
                 return done();
               }
             );
@@ -238,7 +238,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('6. Cannot view builds for private project',
+    it('6. Can view builds for private project',
       function (done) {
         var query = util.format('projectIds=%s', projectId);
         global.ghcMemberAdapter.getRuns(query,
@@ -281,49 +281,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-
-    it('9. Can download logs',
-      function (done) {
-        var bag = {
-          runId: runId,
-          logs: []
-        };
-        async.series([
-          getJobs.bind(null, bag),
-          getLogs.bind(null, bag)
-        ],
-          function (err) {
-            assert.isNotEmpty(bag.logs, 'logs not found');
-            return done(err);
-          }
-        );
-      }
-    );
-
-    function getJobs(bag, next) {
-      var query = util.format('runIds=%s', bag.runId);
-      global.ghcMemberAdapter.getJobs(query,
-        function (err, response) {
-          if (err || _.isEmpty(response))
-            return next(new Error(util.format('Cannot find jobs for run' +
-              ' id: %s, err: %s', bag.runId, err)));
-          bag.jobId = _.first(_.pluck(response, 'id'));
-          return next();
-        }
-      );
-    }
-
-    function getLogs(bag, next) {
-      global.ghcMemberAdapter.getJobConsolesByJobId(bag.jobId, '',
-        function (err, response) {
-          if (err)
-            return next(new Error(util.format('Cannot get consoles for ' +
-              'job id: %s, err: %s, %s', bag.jobId, err, response)));
-          bag.logs = response;
-          return next();
-        }
-      );
-    }
+    // TODO: 9. Can download logs
 
     it('10. CANNOT Reset a private project',
       function (done) {
