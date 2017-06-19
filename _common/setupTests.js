@@ -6,6 +6,7 @@ module.exports = self;
 var chai = require('chai');
 var fs = require('fs');
 global.assert = chai.assert;
+global.expect = require('chai').expect;
 global.util = require('util');
 global._ = require('underscore');
 global.async = require('async');
@@ -45,7 +46,8 @@ function setupTests() {
         systemCodes: null
       };
       // setup any more data needed for tests below
-      async.parallel([
+      async.parallel(
+        [
           getSystemCodes.bind(null, bag)
         ],
         function (err) {

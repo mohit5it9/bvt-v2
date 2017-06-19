@@ -162,7 +162,7 @@ describe(testSuite + testSuiteDesc,
 
                     var processingStatusCode = _.findWhere(global.systemCodes,
                       {group: 'statusCodes', name: 'PROCESSING'}).code;
-                    if (run.statusCode === processingStatusCode) {
+                    if (run.statusCode !== processingStatusCode) {
                       expBackoff.backoff();
                     } else {
                       expBackoff.reset();
@@ -203,7 +203,59 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('7. CANNOT cancel builds for private project',
+    it('7. CANNOT view consoles',
+      function (done) {
+        var bag = {
+          runId: runId,
+          logs: []
+        };
+        async.series([
+          getJobsByPublicUser.bind(null, bag),
+          getJobsByAdmin.bind(null, bag),
+          getLogs.bind(null, bag)
+        ],
+          function (err) {
+            return done(err);
+          }
+        );
+      }
+    );
+    function getJobsByPublicUser(bag, next) {
+      var query = util.format('runIds=%s', bag.runId);
+      global.pubAdapter.getJobs(query,
+        function (err, response) {
+          assert.strictEqual(err, 404, util.format('Public user should not ' +
+            'find jobs for run id: %s, err: %s, %s', bag.runId, err, response));
+          return next();
+        }
+      );
+    }
+
+    function getJobsByAdmin(bag, next) {
+      var query = util.format('runIds=%s', bag.runId);
+      global.ghcAdminAdapter.getJobs(query,
+        function (err, response) {
+          if (err || _.isEmpty(response))
+            return next(new Error(util.format('Cannot find jobs for run' +
+              ' id: %s, err: %s', bag.runId, err)));
+          bag.jobId = _.first(_.pluck(response, 'id'));
+          return next();
+        }
+      );
+    }
+
+    function getLogs(bag, next) {
+      global.pubAdapter.getJobConsolesByJobId(bag.jobId, '',
+        function (err, response) {
+          assert.strictEqual(err, 404, util.format('public user should not ' +
+            'get consoles for job id: %s, err: %s, %s', bag.jobId, err,
+            response));
+          return next();
+        }
+      );
+    }
+
+    it('8. CANNOT cancel builds for private project',
       function (done) {
         global.pubAdapter.cancelRunById(runId,
           function (err, response) {
@@ -216,7 +268,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('8. CANNOT run custom build',
+    it('9. CANNOT run custom build',
       function (done) {
         var json = {type: 'push', globalEnv: {key: 'value'}};
         global.pubAdapter.triggerNewBuildByProjectId(projectId, json,
@@ -230,9 +282,9 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    // TODO: 9. Can download logs
+    // TODO: 10. Cannot reset cache
 
-    it('10. CANNOT Reset a private project',
+    it('11. CANNOT Reset a private project',
       function (done) {
         var json = {projectId: projectId};
         global.pubAdapter.resetProjectById(projectId, json,
@@ -245,7 +297,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('11. CANNOT Delete a private project',
+    it('12. CANNOT Delete a private project',
       function (done) {
         var json = {projectId: projectId};
         global.pubAdapter.deleteProjectById(projectId, json,

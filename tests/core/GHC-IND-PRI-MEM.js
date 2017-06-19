@@ -203,7 +203,7 @@ describe(testSuite + testSuiteDesc,
 
             expBackoff.on('ready',
               function () {
-                global.ghcAdminAdapter.getRunById(runId,
+                global.ghcMemberAdapter.getRunById(runId,
                   function (err, run) {
                     if (err)
                       return done(new Error('Failed to get run id: %s, err:',
@@ -211,7 +211,7 @@ describe(testSuite + testSuiteDesc,
 
                     var processingStatusCode = _.findWhere(global.systemCodes,
                       {group: 'statusCodes', name: 'PROCESSING'}).code;
-                    if (run.statusCode === processingStatusCode) {
+                    if (run.statusCode !== processingStatusCode) {
                       expBackoff.backoff();
                     } else {
                       expBackoff.reset();
@@ -254,7 +254,50 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('7. CANNOT cancel builds for private project',
+    it('7. Can view consoles',
+      function (done) {
+        var bag = {
+          runId: runId,
+          logs: []
+        };
+        async.series([
+          getJobs.bind(null, bag),
+          getLogs.bind(null, bag)
+        ],
+          function (err) {
+            assert.isNotEmpty(bag.logs, 'logs not found');
+            return done(err);
+          }
+        );
+      }
+    );
+
+    function getJobs(bag, next) {
+      var query = util.format('runIds=%s', bag.runId);
+      global.ghcMemberAdapter.getJobs(query,
+        function (err, response) {
+          if (err || _.isEmpty(response))
+            return next(new Error(util.format('Cannot find jobs for run' +
+              ' id: %s, err: %s', bag.runId, err)));
+          bag.jobId = _.first(_.pluck(response, 'id'));
+          return next();
+        }
+      );
+    }
+
+    function getLogs(bag, next) {
+      global.ghcMemberAdapter.getJobConsolesByJobId(bag.jobId, '',
+        function (err, response) {
+          if (err)
+            return next(new Error(util.format('Cannot get consoles for ' +
+              'job id: %s, err: %s, %s', bag.jobId, err, response)));
+          bag.logs = response;
+          return next();
+        }
+      );
+    }
+
+    it('8. CANNOT cancel builds for private project',
       function (done) {
         global.ghcMemberAdapter.cancelRunById(runId,
           function (err, response) {
@@ -267,7 +310,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('8. CANNOT run custom build',
+    it('9. CANNOT run custom build',
       function (done) {
         var json = {type: 'push', globalEnv: {key: 'value'}};
         global.ghcMemberAdapter.triggerNewBuildByProjectId(projectId, json,
@@ -281,9 +324,9 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    // TODO: 9. Can download logs
+    // TODO: 10. cannot reset cache
 
-    it('10. CANNOT Reset a private project',
+    it('11. CANNOT Reset a private project',
       function (done) {
         var json = {projectId: projectId};
         global.ghcMemberAdapter.resetProjectById(projectId, json,
@@ -296,7 +339,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('11. CANNOT Delete a private project',
+    it('12. CANNOT Delete a private project',
       function (done) {
         var json = {projectId: projectId};
         global.ghcMemberAdapter.deleteProjectById(projectId, json,

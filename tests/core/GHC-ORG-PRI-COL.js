@@ -176,7 +176,7 @@ describe(testSuite + testSuiteDesc,
 
                     var processingStatusCode = _.findWhere(global.systemCodes,
                       {group: 'statusCodes', name: 'PROCESSING'}).code;
-                    if (run.statusCode === processingStatusCode) {
+                    if (run.statusCode !== processingStatusCode) {
                       expBackoff.backoff();
                     } else {
                       expBackoff.reset();
@@ -219,35 +219,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('7. Can cancel build',
-      function (done) {
-        global.ghcCollabAdapter.cancelRunById(runId,
-          function (err, response) {
-            if (err)
-              return done(new Error(util.format('Cannot cancel build id: %d ' +
-                'for project id: %s, err: %s, %s', runId, projectId, err,
-                response)));
-            return done();
-          }
-        );
-      }
-    );
-
-    it('8. Can run custom build',
-      function (done) {
-        var json = {type: 'push', globalEnv: {key: 'value'}};
-        global.ghcCollabAdapter.triggerNewBuildByProjectId(projectId, json,
-          function (err, response) {
-            if (err)
-              return done(new Error(util.format('Cannot trigger custom build ' +
-                'for project id: %s, err: %s, %s', projectId, err, response)));
-            return done();
-          }
-        );
-      }
-    );
-
-    it('9. Can download logs',
+    it('9. Can view consoles',
       function (done) {
         var bag = {
           runId: runId,
@@ -290,7 +262,37 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    it('10. CANNOT Reset a private project',
+    it('8. Can cancel build',
+      function (done) {
+        global.ghcCollabAdapter.cancelRunById(runId,
+          function (err, response) {
+            if (err)
+              return done(new Error(util.format('Cannot cancel build id: %d ' +
+                'for project id: %s, err: %s, %s', runId, projectId, err,
+                response)));
+            return done();
+          }
+        );
+      }
+    );
+
+    it('9. Can run custom build',
+      function (done) {
+        var json = {type: 'push', globalEnv: {key: 'value'}};
+        global.ghcCollabAdapter.triggerNewBuildByProjectId(projectId, json,
+          function (err, response) {
+            if (err)
+              return done(new Error(util.format('Cannot trigger custom build ' +
+                'for project id: %s, err: %s, %s', projectId, err, response)));
+            return done();
+          }
+        );
+      }
+    );
+
+    // TOOD: 10. Can reset cache
+
+    it('11. CANNOT Reset a private project',
       function (done) {
         var json = {projectId: projectId};
         global.ghcCollabAdapter.resetProjectById(projectId, json,
@@ -303,7 +305,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('11. CANNOT Delete a private project',
+    it('12. CANNOT Delete a private project',
       function (done) {
         var json = {projectId: projectId};
         global.ghcCollabAdapter.deleteProjectById(projectId, json,
