@@ -291,8 +291,8 @@ describe(testSuite + testSuiteDesc,
         global.ghcAdminAdapter.putProjectById(projectId, json,
           function (err, response) {
             if (err)
-              return done(new Error(util.format('Cannot reset project id: %s' +
-                ', err: %s, %s', projectId, err, response)));
+              return done(new Error(util.format('Cannot reset cache project ' +
+                'id: %s, err: %s, %s', projectId, err, response)));
             return done();
           }
         );
