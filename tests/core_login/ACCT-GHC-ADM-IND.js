@@ -4,7 +4,7 @@ var setupTests = require('../../_common/setupTests.js');
 var backoff = require('backoff');
 
 var testSuite = 'ACCT-GHC-ADM-IND';
-var testSuiteDesc = ' - TestCases for Github Admin for login';
+var testSuiteDesc = ' - TestSuite for Github Admin for login';
 
 describe(testSuite + testSuiteDesc,
   function () {

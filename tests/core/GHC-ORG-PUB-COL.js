@@ -18,12 +18,14 @@ describe(testSuite + testSuiteDesc,
           function () {
             global.setupGithubCollabAdapter();
             // get public project before starting the tests
-            var query = util.format('name=%s', global.GHC_PUBLIC_PROJECT);
+            var query = util.format('name=%s', global.GHC_PUBLIC_PROJ);
             global.ghcCollabAdapter.getProjects(query,
               function (err, projects) {
-                if (err || _.isEmpty(projects))
-                  return done(new Error(util.format('cannot get project for ' +
-                    'query: %s, Err: %s', query, err)));
+                if (err || _.isEmpty(projects)) {
+                  logger.error(util.format('cannot get project for ' +
+                    'query: %s, Err: %s', query, err));
+                  return done(true);
+                }
                 var project = _.first(projects);
                 projectId = project.id;
                 return done();
