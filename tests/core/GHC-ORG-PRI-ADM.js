@@ -220,35 +220,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('7. Can cancel build',
-      function (done) {
-        global.ghcAdminAdapter.cancelRunById(runId,
-          function (err, response) {
-            if (err)
-              return done(new Error(util.format('Cannot cancel build id: %d ' +
-                'for project id: %s, err: %s, %s', runId, projectId, err,
-                response)));
-            return done();
-          }
-        );
-      }
-    );
-
-    it('8. Can run custom build',
-      function (done) {
-        var json = {type: 'push', globalEnv: {key: 'value'}};
-        global.ghcAdminAdapter.triggerNewBuildByProjectId(projectId, json,
-          function (err, response) {
-            if (err)
-              return done(new Error(util.format('Cannot trigger custom build ' +
-                'for project id: %s, err: %s, %s', projectId, err, response)));
-            return done();
-          }
-        );
-      }
-    );
-
-    it('9. Can view consoles',
+    it('7. Can view consoles',
       function (done) {
         var bag = {
           runId: runId,
@@ -291,7 +263,37 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    it('10. Can Reset a private project',
+    it('8. Can cancel build',
+      function (done) {
+        global.ghcAdminAdapter.cancelRunById(runId,
+          function (err, response) {
+            if (err)
+              return done(new Error(util.format('Cannot cancel build id: %d ' +
+                'for project id: %s, err: %s, %s', runId, projectId, err,
+                response)));
+            return done();
+          }
+        );
+      }
+    );
+
+    it('9. Can run custom build',
+      function (done) {
+        var json = {type: 'push', globalEnv: {key: 'value'}};
+        global.ghcAdminAdapter.triggerNewBuildByProjectId(projectId, json,
+          function (err, response) {
+            if (err)
+              return done(new Error(util.format('Cannot trigger custom build ' +
+                'for project id: %s, err: %s, %s', projectId, err, response)));
+            return done();
+          }
+        );
+      }
+    );
+
+    // TODO: 10. Can clear cache
+
+    it('11. Can Reset a private project',
       function (done) {
         var json = {projectId: projectId};
         global.ghcAdminAdapter.resetProjectById(projectId, json,
@@ -305,7 +307,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('11. Can Delete a private project',
+    it('12. Can Delete a private project',
       function (done) {
         var json = {projectId: projectId};
         global.ghcAdminAdapter.deleteProjectById(projectId, json,
