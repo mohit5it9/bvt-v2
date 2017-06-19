@@ -11,6 +11,7 @@ setup_envs() {
 }
 
 core_tests() {
+  exec_container_cmd "./node_modules/eslint/bin/eslint.js tests"
   exec_container_cmd "npm run start-tests"
 }
 

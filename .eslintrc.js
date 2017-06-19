@@ -1,11 +1,7 @@
 module.exports = {
-  // TODO: add a shippable.yml for linting checks
   "env": {
     "browser": false
   },
-  "plugins": [
-    "callback-function"
-  ],
   "globals": {
     "__dirname": true,
     "_": true,
@@ -27,7 +23,7 @@ module.exports = {
   },
   "extends": "airbnb-base/legacy",
   "rules": {
-    // rules to override from airbnb/legacy
+    // Rules to override from airbnb/legacy
     "object-curly-spacing": ["error", "never"],
     "curly": ["error", "multi", "consistent"],
     "no-param-reassign": ["error", { "props": false }],
@@ -37,7 +33,7 @@ module.exports = {
     "global-require": ["warn"],
     "no-shadow": ["warn"],
 
-    // rules from airbnb that we won't be using
+    // Rules from airbnb/legacy that we won't be using
     "consistent-return": 0,
     "default-case": 0,
     "func-names": 0,
@@ -49,9 +45,8 @@ module.exports = {
     "no-param-reassign": 0,
     "one-var-declaration-per-line": 0,
     "one-var": 0,
-    // extra rules not present in airbnb
+
+    // Extra rules not present in airbnb/legacy
     "max-len": ["error", 80],
-    // custom rules
-    "callback-function/on-newline": ["error", "auto-fix"]
   }
 };
