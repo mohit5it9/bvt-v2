@@ -203,34 +203,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('7. CANNOT cancel builds for private project',
-      function (done) {
-        global.pubAdapter.cancelRunById(runId,
-          function (err, response) {
-            assert.strictEqual(err, 401, util.format('Cannot cancel build  ' +
-              'id: %d for project id: %s, err: %s, %s', runId, projectId, err,
-              response));
-            return done();
-          }
-        );
-      }
-    );
-
-    it('8. CANNOT run custom build',
-      function (done) {
-        var json = {type: 'push', globalEnv: {key: 'value'}};
-        global.pubAdapter.triggerNewBuildByProjectId(projectId, json,
-          function (err, response) {
-            assert.strictEqual(err, 401, util.format('Cannot trigger custom ' +
-              'build for project id: %s, err: %s, %s', projectId, err,
-              response));
-            return done();
-          }
-        );
-      }
-    );
-
-    it('9. CANNOT view consoles',
+    it('7. CANNOT view consoles',
       function (done) {
         var bag = {
           runId: runId,
@@ -282,7 +255,36 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    it('10. CANNOT Reset a private project',
+    it('8. CANNOT cancel builds for private project',
+      function (done) {
+        global.pubAdapter.cancelRunById(runId,
+          function (err, response) {
+            assert.strictEqual(err, 401, util.format('Cannot cancel build  ' +
+              'id: %d for project id: %s, err: %s, %s', runId, projectId, err,
+              response));
+            return done();
+          }
+        );
+      }
+    );
+
+    it('9. CANNOT run custom build',
+      function (done) {
+        var json = {type: 'push', globalEnv: {key: 'value'}};
+        global.pubAdapter.triggerNewBuildByProjectId(projectId, json,
+          function (err, response) {
+            assert.strictEqual(err, 401, util.format('Cannot trigger custom ' +
+              'build for project id: %s, err: %s, %s', projectId, err,
+              response));
+            return done();
+          }
+        );
+      }
+    );
+
+    // TODO: 10. Cannot reset cache
+
+    it('11. CANNOT Reset a private project',
       function (done) {
         var json = {projectId: projectId};
         global.pubAdapter.resetProjectById(projectId, json,
@@ -295,7 +297,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('11. CANNOT Delete a private project',
+    it('12. CANNOT Delete a private project',
       function (done) {
         var json = {projectId: projectId};
         global.pubAdapter.deleteProjectById(projectId, json,
