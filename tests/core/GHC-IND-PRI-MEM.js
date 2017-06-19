@@ -254,34 +254,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('7. CANNOT cancel builds for private project',
-      function (done) {
-        global.ghcMemberAdapter.cancelRunById(runId,
-          function (err, response) {
-            assert.strictEqual(err, 404, util.format('Cannot cancel build  ' +
-              'id: %d for project id: %s, err: %s, %s', runId, projectId, err,
-              response));
-            return done();
-          }
-        );
-      }
-    );
-
-    it('8. CANNOT run custom build',
-      function (done) {
-        var json = {type: 'push', globalEnv: {key: 'value'}};
-        global.ghcMemberAdapter.triggerNewBuildByProjectId(projectId, json,
-          function (err, response) {
-            assert.strictEqual(err, 404, util.format('Cannot trigger custom ' +
-              'build for project id: %s, err: %s, %s', projectId, err,
-              response));
-            return done();
-          }
-        );
-      }
-    );
-
-    it('9. Can view consoles',
+    it('7. Can view consoles',
       function (done) {
         var bag = {
           runId: runId,
@@ -324,7 +297,36 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    it('10. CANNOT Reset a private project',
+    it('8. CANNOT cancel builds for private project',
+      function (done) {
+        global.ghcMemberAdapter.cancelRunById(runId,
+          function (err, response) {
+            assert.strictEqual(err, 404, util.format('Cannot cancel build  ' +
+              'id: %d for project id: %s, err: %s, %s', runId, projectId, err,
+              response));
+            return done();
+          }
+        );
+      }
+    );
+
+    it('9. CANNOT run custom build',
+      function (done) {
+        var json = {type: 'push', globalEnv: {key: 'value'}};
+        global.ghcMemberAdapter.triggerNewBuildByProjectId(projectId, json,
+          function (err, response) {
+            assert.strictEqual(err, 404, util.format('Cannot trigger custom ' +
+              'build for project id: %s, err: %s, %s', projectId, err,
+              response));
+            return done();
+          }
+        );
+      }
+    );
+
+    // TODO: 10. cannot reset cache
+
+    it('11. CANNOT Reset a private project',
       function (done) {
         var json = {projectId: projectId};
         global.ghcMemberAdapter.resetProjectById(projectId, json,
@@ -337,7 +339,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('11. CANNOT Delete a private project',
+    it('12. CANNOT Delete a private project',
       function (done) {
         var json = {projectId: projectId};
         global.ghcMemberAdapter.deleteProjectById(projectId, json,
