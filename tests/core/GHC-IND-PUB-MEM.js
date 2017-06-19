@@ -4,7 +4,7 @@
 var setupTests = require('../../_common/setupTests.js');
 var backoff = require('backoff');
 
-var testSuite = 'GHC-IND-PRI-MEM';
+var testSuite = 'GHC-IND-PUB-MEM';
 var testSuiteDesc = ' - TestSuite for Github Individual, public project for' +
   ' Member';
 
@@ -20,17 +20,23 @@ describe(testSuite + testSuiteDesc,
           function () {
             global.setupGithubMemberAdapter();
             global.setupGithubAdminAdapter();
+            var bag = {
+              projects: null
+            };
 
-            var query = util.format('name=%s', global.GHC_PUBLIC_PROJ);
-            global.ghcAdminAdapter.getProjects(query,
-              function (err, projects) {
-                if (err || _.isEmpty(projects)) {
-                  logger.error(util.format('cannot get project for ' +
-                    'query: %s, Err: %s', query, err));
-                  return done(true);
+            // NOTE: logic below can  be simplified by fetching project
+            // directly by adminAdapter
+            async.series(
+              [
+                getSubscription.bind(null, bag),
+                getProject.bind(null, bag)
+              ],
+              function (err) {
+                if (err) {
+                  logger.error(testSuite, 'failed to setup tests. err:', err);
+                  return done(err);
                 }
-                var project = _.first(projects);
-                projectId = project.id;
+                projectId = bag.projectId;
                 return done();
               }
             );
@@ -42,6 +48,46 @@ describe(testSuite + testSuiteDesc,
         );
       }
     );
+
+    // get sub id for shiptest-github-organization-1
+    function getSubscription(bag, next) {
+      var query = '';
+      global.ghcMemberAdapter.getSubscriptions(query,
+        function (err, subs) {
+          if (err) {
+            logger.error('failed to get subscription for query %s, err %s',
+              query, err);
+            return next(true);
+          }
+          var filteredSub = _.filter(subs,
+            function (sub) {
+              return sub.orgName === 'shiptest-github-owner';
+            }
+          );
+          if (!_.isEmpty(filteredSub))
+            bag.subscriptionId = _.first(filteredSub).id;
+          return next();
+        }
+      );
+    }
+
+    function getProject(bag, next) {
+      // get private project before starting the tests
+      var query = util.format('name=%s&subscriptionIds=%s',
+        global.GHC_MEMBER_PRIVATE_PROJ, bag.subscriptionId);
+      global.ghcMemberAdapter.getProjects(query,
+        function (err, projects) {
+          if (err || _.isEmpty(projects)) {
+            util.format('cannot get project for query: %s, Err: %s',
+              query, err);
+            return next(err);
+          }
+
+          bag.projectId = _.first(projects).id;
+          return next();
+        }
+      );
+    }
 
     it('1. CANNOT Enable a public project',
       function (done) {
@@ -62,14 +108,14 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         var json = {type: 'ci'};
         global.ghcAdminAdapter.enableProjectById(projectId, json,
-          function (err) {
+          function (err, response) {
             assert(!err, util.format('admin should be able to enable the ' +
-              'project got err: %s', err));
+              'project got err: %s, %s', err, response));
 
             global.ghcMemberAdapter.syncProjectById(projectId,
               function (e, project) {
-                assert(!err, util.format('Failed to sync project' +
-                    '%s with error: %s, project: %s', projectId, err, project));
+                assert(!e, util.format('Failed to sync project' +
+                    '%s with error: %s, project: %s', projectId, e, project));
                 assert.isNotEmpty(project, 'Project should not be empty');
                 assert.isNotEmpty(project.branches,
                   'Project should have branches');
@@ -101,7 +147,7 @@ describe(testSuite + testSuiteDesc,
         global.ghcAdminAdapter.putProjectById(projectId, json,
           function (err) {
             if (err)
-              return done('suAdapter unable be able to pause project');
+              return done('adminAdapter unable be able to pause project');
             json = {propertyBag: {isPaused: false}};
 
             // try resume if enable is success
@@ -123,7 +169,7 @@ describe(testSuite + testSuiteDesc,
         global.ghcMemberAdapter.triggerNewBuildByProjectId(projectId, json,
           function (err, response) {
             assert.strictEqual(err, 404, util.format('should not trigger ' +
-              'manual build for project id: %s, err: %s', projectId, err,
+              'manual build for project id: %s, err: %s, %s', projectId, err,
               response));
           }
         );
@@ -134,7 +180,8 @@ describe(testSuite + testSuiteDesc,
               function (err, response) {
                 if (err)
                   return reject(new Error(util.format('Cannot trigger manual ' +
-                    'build for project id: %s, err: %s', projectId, err)));
+                    'build for project id: %s, err: %s, %s', projectId, err,
+                    response)));
 
                 return resolve(response);
               }
@@ -188,6 +235,7 @@ describe(testSuite + testSuiteDesc,
             expBackoff.backoff();
           },
           function (err) {
+            logger.warn(testSuite, 'error while triggering build:', err);
             return done(err);
           }
         );
@@ -308,8 +356,7 @@ describe(testSuite + testSuiteDesc,
         );
       }
     );
-    // do cleanup of all the resources. if cleanup fails, resource will
-    // be tracked in nconf
+
     after(
       function (done) {
         if (projectId)
