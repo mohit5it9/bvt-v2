@@ -3,16 +3,15 @@
 // login tests for collab
 
 var setupTests = require('../../_common/setupTests.js');
-
-var account = {};
-var githubSysIntId = null;
 var backoff = require('backoff');
 
 var testSuite = 'ACCT-GHC-COL-IND';
-var testSuiteDesc = '- TestCases for Github Collab for login';
+var testSuiteDesc = ' - TestCases for Github Collab for login';
 
 describe(testSuite + testSuiteDesc,
   function () {
+    var account = {};
+    var githubSysIntId = null;
     this.timeout(0);
 
     before(

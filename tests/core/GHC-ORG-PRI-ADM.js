@@ -3,15 +3,13 @@
 var setupTests = require('../../_common/setupTests.js');
 var backoff = require('backoff');
 
-var projectId = null;
-var runId = null;
-
 var testSuite = 'GHC-ORG-PRI-ADM';
-var testSuiteDesc = '- TestSuite for Github Organization, Private project for' +
-  ' Admin';
+var testSuiteDesc = ' - TestSuite for Github Org, private project for Admin';
 
 describe(testSuite + testSuiteDesc,
   function () {
+    var projectId = null;
+    var runId = null;
     this.timeout(0);
 
     before(
@@ -58,26 +56,17 @@ describe(testSuite + testSuiteDesc,
     );
 
     it('2. Can Synchonize a private project',
-      function () {
-        var projectSynced = new Promise(
-          function (resolve, reject) {
-            global.ghcAdminAdapter.syncProjectById(projectId,
-              function (err, project) {
-                if (err)
-                  return reject(new Error(util.format('Failed to sync project' +
-                    '%s with error: %s', projectId, err)));
-                return resolve(project);
-              }
-            );
-          }
-        );
-        return projectSynced.then(
-          function (project) {
+      function (done) {
+        global.ghcAdminAdapter.syncProjectById(projectId,
+          function (err, project) {
+            assert(!err, util.format('Failed to sync project' +
+                '%s with error: %s', projectId, err));
             // NOTE: can add more assertions here
-            assert.isNotEmpty(project.branches,
-              'Project should have branches');
+            assert.isNotEmpty(project, 'Project should not be empty');
+            assert.isNotEmpty(project.branches, 'Project should have branches');
+            return done();
           }
-        );
+            );
       }
     );
 

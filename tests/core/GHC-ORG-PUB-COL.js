@@ -3,15 +3,13 @@
 var setupTests = require('../../_common/setupTests.js');
 var backoff = require('backoff');
 
-var projectId = null;
-var runId = null;
-
 var testSuite = 'GHC-ORG-PUB-COL';
-var testSuiteDesc = '- TestSuite for Github Organization, Public project for' +
-  ' Collab';
+var testSuiteDesc = ' - TestSuite for Github Org, public project for Collab';
 
 describe(testSuite + testSuiteDesc,
   function () {
+    var projectId = null;
+    var runId = null;
     this.timeout(0);
 
     before(
