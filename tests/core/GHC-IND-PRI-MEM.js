@@ -323,7 +323,24 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    // TODO: 10. cannot reset cache
+    it('10. CANNOT reset cache',
+      function (done) {
+        var json = {
+          propertyBag: {
+            cacheTag: 0,
+            cacheResetDate: Date.now()
+          }
+        };
+        global.ghcMemberAdapter.putProjectById(projectId, json,
+          function (err, response) {
+            assert.strictEqual(err, 404, util.format('Member should not ' +
+              'reset cache project id: %s, err: %s, %s', projectId, err,
+              response));
+            return done();
+          }
+        );
+      }
+    );
 
     it('11. CANNOT Reset a private project',
       function (done) {

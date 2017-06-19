@@ -278,7 +278,24 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    // TOOD: 10. Can reset cache
+    it('10. Can reset cache',
+      function (done) {
+        var json = {
+          propertyBag: {
+            cacheTag: 0,
+            cacheResetDate: Date.now()
+          }
+        };
+        global.ghcCollabAdapter.putProjectById(projectId, json,
+          function (err, response) {
+            if (err)
+              return done(new Error(util.format('Cannot reset project id: %s' +
+                ', err: %s, %s', projectId, err, response)));
+            return done();
+          }
+        );
+      }
+    );
 
     it('11. CANNOT Reset a private project',
       function (done) {
