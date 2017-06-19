@@ -281,7 +281,24 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    // TODO: 10. Cannot reset cache
+    it('10. CANNOT reset cache',
+      function (done) {
+        var json = {
+          propertyBag: {
+            cacheTag: 0,
+            cacheResetDate: Date.now()
+          }
+        };
+        global.pubAdapter.putProjectById(projectId, json,
+          function (err, response) {
+            assert.strictEqual(err, 401, util.format('public user should not ' +
+              'reset cache project id: %s, err: %s, %s', projectId, err,
+              response));
+            return done();
+          }
+        );
+      }
+    );
 
     it('11. CANNOT Reset a private project',
       function (done) {

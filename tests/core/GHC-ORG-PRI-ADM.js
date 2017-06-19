@@ -280,7 +280,24 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    // TODO: 10. Can clear cache
+    it('10. Can reset cache',
+      function (done) {
+        var json = {
+          propertyBag: {
+            cacheTag: 0,
+            cacheResetDate: Date.now()
+          }
+        };
+        global.ghcAdminAdapter.putProjectById(projectId, json,
+          function (err, response) {
+            if (err)
+              return done(new Error(util.format('Cannot reset cache project ' +
+                'id: %s, err: %s, %s', projectId, err, response)));
+            return done();
+          }
+        );
+      }
+    );
 
     it('11. Can Reset a private project',
       function (done) {
