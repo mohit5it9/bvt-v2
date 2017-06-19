@@ -3,15 +3,14 @@
 var setupTests = require('../../_common/setupTests.js');
 var backoff = require('backoff');
 
-var runId = null;
-var projectId = null;
-
 var testSuite = 'GHC-IND-PRI-MEM';
-var testSuiteDesc = '- TestSuite for Github Individual, Private project for' +
+var testSuiteDesc = ' - TestSuite for Github Individual, private project for' +
   ' Member';
 
 describe(testSuite + testSuiteDesc,
   function () {
+    var runId = null;
+    var projectId = null;
     this.timeout(0);
 
     before(

@@ -1,16 +1,15 @@
 'use strict';
 
 var setupTests = require('../../_common/setupTests.js');
-
-var account = {};
-var githubSysIntId = null;
 var backoff = require('backoff');
 
 var testSuite = 'ACCT-GHC-MEM-IND';
-var testSuiteDesc = '- TestCases for Individual Github Member for login';
+var testSuiteDesc = ' - TestCases for Individual Github Member for login';
 
 describe(testSuite + testSuiteDesc,
   function () {
+    var account = {};
+    var githubSysIntId = null;
     this.timeout(0);
 
     before(
@@ -26,18 +25,18 @@ describe(testSuite + testSuiteDesc,
                 }
 
                 var gitSysInt = _.first(systemIntegrations);
-                assert.isOk(gitSysInt, 'No system integration found for github');
+                assert.isOk(gitSysInt, 'No sysInt found for github');
                 assert.isOk(gitSysInt.id, 'Github sysIntId should be present');
                 githubSysIntId = gitSysInt.id;
                 return done();
               }
             );
+          },
+          function (err) {
+            logger.error(testSuite, 'failed to setup tests. err:', err);
+            return done(err);
           }
         );
-      },
-      function (err) {
-        logger.error(testSuite, 'failed to setup tests. err:', err);
-        return done(err);
       }
     );
 

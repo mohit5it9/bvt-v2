@@ -1,16 +1,15 @@
 'use strict';
 
 var setupTests = require('../../_common/setupTests.js');
-
-var account = {};
-var githubSysIntId = null;
 var backoff = require('backoff');
 
 var testSuite = 'ACCT-GHC-ADM-IND';
-var testSuiteDesc = '- TestCases for Github Admin for login';
+var testSuiteDesc = ' - TestCases for Github Admin for login';
 
 describe(testSuite + testSuiteDesc,
   function () {
+    var account = {};
+    var githubSysIntId = null;
     this.timeout(0);
 
     before(
@@ -26,18 +25,18 @@ describe(testSuite + testSuiteDesc,
                 }
 
                 var gitSysInt = _.first(systemIntegrations);
-                assert.isOk(gitSysInt, 'No system integration found for github');
+                assert.isOk(gitSysInt, 'No sysInt found for github');
                 assert.isOk(gitSysInt.id, 'Github sysIntId should be present');
                 githubSysIntId = gitSysInt.id;
                 return done();
               }
             );
+          },
+          function (err) {
+            logger.error(testSuite, 'failed to setup tests. err:', err);
+            return done(err);
           }
         );
-      },
-      function (err) {
-        logger.error(testSuite, 'failed to setup tests. err:', err);
-        return done(err);
       }
     );
 
@@ -89,12 +88,12 @@ describe(testSuite + testSuiteDesc,
                       return reject(new Error('Failed to get account with err',
                         err));
 
-                    var account = _.first(accounts);
-                    if (account.isSyncing !== false || !account.lastSyncStartDate) {
+                    var acc = _.first(accounts);
+                    if (acc.isSyncing !== false || !acc.lastSyncStartDate) {
                       expBackoff.backoff();
                     } else {
                       expBackoff.reset();
-                      return resolve(account);
+                      return resolve(acc);
                     }
                   }
                 );
@@ -112,8 +111,8 @@ describe(testSuite + testSuiteDesc,
           }
         );
         return accountSynced.then(
-          function (account) {
-            assert.isNotEmpty(account, 'account should not be empty');
+          function (acc) {
+            assert.isNotEmpty(acc, 'account should not be empty');
           }
         );
       }

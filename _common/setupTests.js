@@ -42,6 +42,8 @@ function setupTests() {
       global.GHC_COLLAB_PRIVATE_PROJ = 'shiptest_org_private_project_1';
       global.GHC_OWNER_PRIVATE_PROJ = 'shiptest_org_private_project_1';
 
+      global.GHC_PUBLIC_PROJ = 'shiptest_org_public_project_1';
+
       var bag = {
         systemCodes: null
       };
