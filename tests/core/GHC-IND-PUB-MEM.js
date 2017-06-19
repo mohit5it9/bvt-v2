@@ -338,7 +338,7 @@ describe(testSuite + testSuiteDesc,
         };
         global.ghcMemberAdapter.putProjectById(projectId, json,
           function (err, response) {
-            assert.strictEqual(err, 401, util.format('Member should not ' +
+            assert.strictEqual(err, 404, util.format('Member should not ' +
               'reset cache project id: %s, err: %s, %s', projectId, err,
               response));
             return done();
