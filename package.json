@@ -11,6 +11,8 @@
     "async": "2.4.1",
     "backoff": "2.5.0",
     "chai": "4.0.0",
+    "eslint": "3.19.0",
+    "eslint-config-airbnb-base": "11.1.0",
     "github": "6.1.0",
     "mocha": "3.4.2",
     "mocha-multi": "0.9.1",

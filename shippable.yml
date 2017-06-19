@@ -1,0 +1,7 @@
+language: node_js
+node_js:
+  - 4.8.0
+build:
+  ci:
+    - npm install
+    - ./node_modules/eslint/bin/eslint.js tests
