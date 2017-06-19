@@ -6,7 +6,7 @@ var setupTests = require('../../_common/setupTests.js');
 var backoff = require('backoff');
 
 var testSuite = 'ACCT-GHC-COL-IND';
-var testSuiteDesc = ' - TestCases for Github Collab for login';
+var testSuiteDesc = ' - TestSuite for Github Collab for login';
 
 describe(testSuite + testSuiteDesc,
   function () {

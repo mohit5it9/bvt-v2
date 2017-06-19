@@ -4,7 +4,7 @@ var setupTests = require('../../_common/setupTests.js');
 var backoff = require('backoff');
 
 var testSuite = 'ACCT-GHC-MEM-IND';
-var testSuiteDesc = ' - TestCases for Individual Github Member for login';
+var testSuiteDesc = ' - TestSuite for Individual Github Member for login';
 
 describe(testSuite + testSuiteDesc,
   function () {
