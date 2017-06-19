@@ -42,8 +42,13 @@ run_npm_install() {
   docker exec $ONEBOX_NAME bash -c "cd /home/shippable/$COMPONENT && npm install"
 }
 
+check_linting() {
+  echo "TODO: add linting checks"
+}
+
 main() {
   stop
+  check_linting
   build
   run_container
   run_npm_install
