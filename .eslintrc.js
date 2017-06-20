@@ -29,9 +29,6 @@ module.exports = {
     "no-param-reassign": ["error", { "props": false }],
     "no-underscore-dangle": ["error", { "allow": ["_r", "_p"] }],
     "quote-props": ["error", "consistent-as-needed"],
-    "no-unused-vars": ["warn"],
-    "global-require": ["warn"],
-    "no-shadow": ["warn"],
 
     // Rules from airbnb/legacy that we won't be using
     "consistent-return": 0,
