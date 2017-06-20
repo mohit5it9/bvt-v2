@@ -3,7 +3,8 @@
 var setupTests = require('../../_common/setupTests.js');
 
 var testSuite = 'RES-ORG-PUB-ADM';
-var testSuiteDesc = ' - TestSuite for Github Org, public project for Admin';
+var testSuiteDesc = ' - Validate resources for Github Org, public project ' +
+  'for Admin';
 
 describe(testSuite + testSuiteDesc,
   function () {
