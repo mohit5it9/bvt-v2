@@ -69,6 +69,13 @@ function runTests(bag, next) {
           console.log(str);
         }
       );
+      child.stderr.on('data',
+        function (data) {
+          var str = '' + data;
+          str = str.replace(/\s+$/g, '');
+          console.log(str);
+        }
+      );
       child.on('close',
         function (code) {
           if (code > 0) {
@@ -95,12 +102,11 @@ function doCleanup(bag, next) {
   var who = bag.who + '|' + doCleanup.name;
   logger.debug(who, 'Inside');
 
-  var child = spawn('node', ['doCleanup.js']);
+  var child = spawn('node', ['doCleanup.js'], {stdio: 'inherit'});
   child.on('close',
     function (code, err) {
-      console.log(code, err);
       if (code > 0) {
-        logger.error(who, 'test cleanup failed!');
+        logger.error(who, util.format('test cleanup failed with err %s', err));
         return next(true);
       }
       return next();

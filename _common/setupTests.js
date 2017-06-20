@@ -41,6 +41,7 @@ function setupTests() {
       global.GHC_MEMBER_PRIVATE_PROJ = 'testprivate';
       global.GHC_COLLAB_PRIVATE_PROJ = 'shiptest_org_private_project_1';
       global.GHC_OWNER_PRIVATE_PROJ = 'shiptest_org_private_project_1';
+      global.GHC_PRIVATE_PROJ = 'shiptest_org_private_project_1';
 
       global.GHC_PUBLIC_PROJ = 'shiptest_org_public_project_1';
 
@@ -145,10 +146,35 @@ global.setupGithubAdminAdapter = function (apiToken) {
 global.saveResource = function (resource, done) {
   nconf.file(global.resourcePath);
   nconf.load();
-  global.nconfRes = nconf.get('BVT_RESOURCES') || [];
-  global.nconfRes.push(resource);
+  var nconfRes = nconf.get('BVT_RESOURCES') || [];
+  nconfRes.push(resource);
 
-  nconf.set('BVT_RESOURCES', global.nconfRes);
+  nconf.set('BVT_RESOURCES', nconfRes);
+  nconf.save(
+    function (err) {
+      if (err) {
+        logger.error('Failed to save account info to nconf. Exiting...');
+        process.exit(1);
+      } else {
+        return done();
+      }
+    }
+  );
+};
+
+global.removeResource = function (resource, done) {
+  nconf.file(global.resourcePath);
+  nconf.load();
+  var nconfRes = nconf.get('BVT_RESOURCES') || [];
+
+  // filter out the resource
+  nconfRes = _.filter(nconfRes,
+    function (res) {
+      return !(res.type === resource.type && res.id === resource.id);
+    }
+  );
+
+  nconf.set('BVT_RESOURCES', nconfRes);
   nconf.save(
     function (err) {
       if (err) {

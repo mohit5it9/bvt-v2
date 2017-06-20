@@ -69,8 +69,6 @@ describe(testSuite + testSuiteDesc,
       function () {
         var accountSynced = new Promise(
           function (resolve, reject) {
-            var query = util.format('accountIds=%s', account.collabId);
-
             var expBackoff = backoff.exponential({
               initialDelay: 100, // ms
               maxDelay: 5000 // max retry interval of 5 seconds
@@ -85,6 +83,7 @@ describe(testSuite + testSuiteDesc,
             expBackoff.on('ready',
               function () {
                 // set account when ready
+                var query = util.format('accountIds=%s', account.collabId);
                 global.suAdapter.getAccounts(query,
                   function (err, accounts) {
                     if (err)

@@ -799,6 +799,32 @@ ShippableAdapter.prototype.postSubscriptionAccounts =
     );
   };
 
+ShippableAdapter.prototype.postSubscriptionIntegration =
+  function (json, callback) {
+    this.post(
+      '/subscriptionIntegrations',
+      json,
+      callback
+    );
+  };
+
+ShippableAdapter.prototype.deleteSubscriptionIntegrationById =
+  function (subscriptionIntegrationId, callback) {
+    this.delete(
+      util.format('/subscriptionIntegrations/%s', subscriptionIntegrationId),
+      callback
+    );
+  };
+
+ShippableAdapter.prototype.postNewSyncRepo =
+  function (json, callback) {
+    this.post(
+      '/resources/syncRepo',
+      json,
+      callback
+    );
+  };
+
 ShippableAdapter.prototype.postToClusterNode =
   function (clusterNode, callback) {
     this.post(
