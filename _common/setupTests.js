@@ -14,9 +14,6 @@ global.logger = require('./logging/logger.js')(process.env.LOG_LEVEL);
 var nconf = require('nconf');
 var ShippableAdapter = require('../_common/shippable/Adapter.js');
 
-global.RESOURCE_TYPES = {
-  SUB_INT: 'subscriptionIntegration'
-};
 // each test starts off as a new process, setup required constants
 function setupTests() {
   var setupTestsPromise = new Promise(
