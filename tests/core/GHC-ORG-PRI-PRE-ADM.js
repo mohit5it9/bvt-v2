@@ -4,7 +4,7 @@ var setupTests = require('../../_common/setupTests.js');
 var GithubAdapter = require('../../_common/github/Adapter.js');
 var backoff = require('backoff');
 
-var testSuite = 'GHC-ORG-PRI-COL';
+var testSuite = 'GHC-ORG-PRI-PRE-ADM';
 var testSuiteDesc = ' - TestSuite for Github Org, pull request of private ' +
   'project for Admin';
 
@@ -21,11 +21,18 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         setupTests().then(
           function () {
+            githubAdapter = new GithubAdapter(global.githubOwnerAccessToken,
+              global.GHC_ENDPOINT);
+            global.setupGithubAdminAdapter();
+
+            var bag = {
+              who: util.format('%s|before', testSuite)
+            };
             async.series(
               [
-                init,
-                enableProject,
-                reopenPR
+                getProject.bind(null, bag),
+                enableProject.bind(null, bag),
+                reopenPR.bind(null, bag)
               ],
               function (err) {
                 if (err) {
@@ -44,10 +51,10 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    function init(next) {
-      githubAdapter = new GithubAdapter(global.githubOwnerAccessToken,
-        global.GHC_ENDPOINT);
-      global.setupGithubAdminAdapter();
+    function getProject(bag, next) {
+      var who = bag.who + '|' + getProject.name;
+      logger.debug(who, 'Inside');
+
       // get private project before starting the tests
       var query = util.format('name=%s', global.GHC_OWNER_PRIVATE_PROJ);
       global.ghcAdminAdapter.getProjects(query,
@@ -57,13 +64,17 @@ describe(testSuite + testSuiteDesc,
               'query: %s, Err: %s', query, err)));
           var project = _.first(projects);
           projectId = project.id;
+          // TODO: add project to nconf as soon as it is created
           projectFullName = project.fullName;
           return next();
         }
       );
     }
 
-    function enableProject(next) {
+    function enableProject(bag, next) {
+      var who = bag.who + '|' + enableProject.name;
+      logger.debug(who, 'Inside');
+
       var json = {
         type: 'ci'
       };
@@ -79,7 +90,10 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    function reopenPR(next) {
+    function reopenPR(bag, next) {
+      var who = bag.who + '|' + reopenPR.name;
+      logger.debug(who, 'Inside');
+
       var query = {
         state: 'all'
       };
@@ -98,7 +112,15 @@ describe(testSuite + testSuiteDesc,
               if (pullRequest.state !== 'open')
                 return resolve();
 
-              updatePR(pullRequest, 'closed',
+              var innerBag = {
+                who: util.format('%s|close open PR', testSuite),
+                prNumber: pullRequest.number,
+                status: 'closed'
+              };
+              async.series(
+                [
+                  updatePR.bind(null, innerBag)
+                ],
                 function (updatePRErr) {
                   if (updatePRErr)
                     return reject(new Error('Cannot close PR'));
@@ -110,7 +132,21 @@ describe(testSuite + testSuiteDesc,
 
           closeOpenPR.then(
             function () {
-              updatePR(pullRequest, 'open', next);
+              var innerBag = {
+                who: util.format('%s|open PR', testSuite),
+                prNumber: pullRequest.number,
+                status: 'open'
+              };
+              async.series(
+                [
+                  updatePR.bind(null, innerBag)
+                ],
+                function (updatePRErr) {
+                  if (updatePRErr)
+                    return next(new Error('Cannot open PR'));
+                  return next();
+                }
+              );
             },
             function () {
               return next(new Error('Failed to close open PR'));
@@ -120,12 +156,15 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    function updatePR(pr, status, callback) {
-      githubAdapter.updatePullRequest(projectFullName, pr.number, status,
+    function updatePR(bag, next) {
+      var who = bag.who + '|' + updatePR.name;
+      logger.debug(who, 'Inside');
+
+      githubAdapter.updatePullRequest(projectFullName, bag.prNumber, bag.status,
         function (err) {
-          if (err) return callback(err);
-          logger.info('Updated PR status to ' + status);
-          return callback();
+          if (err) return next(err);
+          logger.info('Updated PR status to ' + bag.status);
+          return next();
         }
       );
     }
@@ -203,11 +242,8 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    // do cleanup of all the resources. if cleanup fails, resource will
-    // be tracked in nconf
     after(
       function (done) {
-        // delete project
         if (projectId)
           global.ghcAdminAdapter.deleteProjectById(projectId, {},
             function (err) {
