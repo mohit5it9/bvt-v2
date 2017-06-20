@@ -310,8 +310,7 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         var who = testSuite + '|after';
         logger.debug(who, 'Inside');
-        // remove resource and githubSubInt
-        // delete project
+
         var bag = {who: who};
         async.series(
           [
