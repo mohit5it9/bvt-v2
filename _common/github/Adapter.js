@@ -112,6 +112,37 @@ Adapter.prototype.put = function (relativeUrl, json, callback) {
   });
 };
 
+Adapter.prototype.patch = function (relativeUrl, json, callback) {
+  var opts = {
+    method: 'PATCH',
+    url: this.baseUrl + relativeUrl,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Authorization': 'token ' + this.token,
+      'User-Agent': 'Shippable v3',
+      'Accept': 'application/vnd.GithubProvider.v3'
+    },
+    json: json
+  };
+  var bag = {
+    opts: opts,
+    relativeUrl: relativeUrl,
+    token: this.token
+  };
+
+  bag.who = util.format('common|github|%s|PATCH|url:%s', self.name,
+    relativeUrl);
+  logger.debug('Starting', bag.who);
+
+  async.series([
+    _performCall.bind(null, bag),
+    _parseResponse.bind(null, bag)
+  ], function () {
+    logger.debug('Completed', bag.who);
+    callback(bag.err, bag.parsedBody, bag.headerLinks, bag.res);
+  });
+};
+
 Adapter.prototype.del = function (relativeUrl, callback) {
   var opts = {
     method: 'DELETE',
@@ -528,6 +559,15 @@ Adapter.prototype.getPullRequests = function (fullName, query, callback) {
     else
       callback(err, allPullRequests);
   }
+};
+
+Adapter.prototype.updatePullRequest = function (fullName, number, state,
+  callback) {
+  var url = '/repos/' + fullName + '/pulls/' + number;
+  var body = {
+    state: state
+  };
+  this.patch(url, body, callback);
 };
 
 Adapter.prototype.postCommitStatus =

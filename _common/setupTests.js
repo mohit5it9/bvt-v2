@@ -21,7 +21,7 @@ function setupTests() {
       global.config = {};
       global.TIMEOUT_VALUE = 0;
       global.config.apiUrl = process.env.SHIPPABLE_API_URL;
-      global.config.githubUrl = 'https://api.github.com';
+      global.GHC_ENDPOINT = 'https://api.github.com';
 
       global.resourcePath = process.env.JOB_STATE + '/resources.json';
       global.githubOwnerAccessToken = process.env.GITHUB_ACCESS_TOKEN_OWNER;
