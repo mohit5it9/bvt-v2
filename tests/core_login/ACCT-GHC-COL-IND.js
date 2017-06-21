@@ -181,16 +181,23 @@ describe(testSuite + testSuiteDesc,
         var query = util.format('subscriptionIds=%s', currentSub.id);
         global.ghcCollabAdapter.getSubscriptionAccounts(query,
           function (err, subAccounts) {
+            assert(!err, util.format('Unable to get subAccounts with error %s',
+              err));
             if (err)
-              return done(new Error('Unable to get subAccounts with error',
+              return done(new Error('',
                 err));
             assert.isNotEmpty(subAccounts,
               'SubscriptionAccounts should not be empty');
             var collabSystemCode = _.findWhere(global.systemCodes,
               {name: 'collaborator', group: 'roles'}).code;
-            assert.isNotEmpty((_.where(subAccounts,
+            var adminSystemCode = _.findWhere(global.systemCodes,
+              {name: 'admin', group: 'roles'}).code;
+            assert.isNotEmpty(_.where(subAccounts,
               {roleCode: collabSystemCode}), 'User with push permission is ' +
-              'not collaborator '));
+              'not collaborator');
+            assert.isEmpty(_.where(subAccounts,
+              {roleCode: adminSystemCode}), 'User with push permission is ' +
+              'having admin role');
             return done();
           }
         );
