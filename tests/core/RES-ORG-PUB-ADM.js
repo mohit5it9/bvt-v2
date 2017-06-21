@@ -127,7 +127,7 @@ describe(testSuite + testSuiteDesc,
       var who = bag.who + '|' + getProject.name;
       logger.debug(who, 'Inside');
 
-      var query = util.format('name=%s', global.GHC_PRIVATE_PROJ);
+      var query = util.format('name=%s', global.GHC_PUBLIC_PROJ);
       global.ghcAdminAdapter.getProjects(query,
         function (err, projects) {
           if (err || _.isEmpty(projects))
@@ -207,11 +207,40 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
+    it('5. Can soft delete resources',
+      function (done) {
+        var query = '';
+        global.suAdapter.deleteResourceById(syncRepoResourceId, query,
+          function (err, response) {
+            assert(!err, util.format('Cleanup failed to soft delete ' +
+              'resource with id: %s err: %s, %s', syncRepoResourceId, err,
+              util.inspect(response)));
+            return done();
+          }
+        );
+      }
+
+    );
+
+    it('6. Can hard delete resources',
+      function (done) {
+        var query = 'hard=true';
+        global.suAdapter.deleteResourceById(syncRepoResourceId, query,
+          function (err, response) {
+            assert(!err, util.format('Cleanup failed to hard delete ' +
+              'resource with id: %s err: %s, %s', syncRepoResourceId, err,
+              util.inspect(response)));
+            syncRepoResourceId = null;
+            return done();
+          }
+        );
+      }
+    );
+
     function deleteResource(bag, next) {
       var who = bag.who + '|' + deleteResource.name;
 
-      if (!syncRepoResourceId)
-        return next('Failed to find syncRepoResouceId');
+      if (!syncRepoResourceId) return next();
       var innerBag = {who: who};
       async.series(
         [
