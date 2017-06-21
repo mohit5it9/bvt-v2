@@ -183,9 +183,6 @@ describe(testSuite + testSuiteDesc,
           function (err, subAccounts) {
             assert(!err, util.format('Unable to get subAccounts with error %s',
               err));
-            if (err)
-              return done(new Error('',
-                err));
             assert.isNotEmpty(subAccounts,
               'SubscriptionAccounts should not be empty');
             var collabSystemCode = _.findWhere(global.systemCodes,
