@@ -225,7 +225,7 @@ describe(testSuite + testSuiteDesc,
             initialDelay: 1000, // ms
             maxDelay: 2000 // max retry interval of 2 seconds
           });
-          expBackoff.failAfter(15); // fail after 30 attempts(~30 sec)
+          expBackoff.failAfter(30); // fail after 30 attempts(~60 sec)
           expBackoff.on('backoff',
             function (number, delay) {
               logger.info('rSync in progress. Retrying after ', delay, ' ms');
