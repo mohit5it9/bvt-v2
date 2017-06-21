@@ -2,9 +2,9 @@
 
 var setupTests = require('../../_common/setupTests.js');
 
-var testSuite = 'RES-ORG-PUB-ADM';
+var testSuite = 'RES-ORG-PUB-COL';
 var testSuiteDesc = ' - Validate resources for Github Org, public project ' +
-  'for Admin';
+  'for Collab';
 
 describe(testSuite + testSuiteDesc,
   function () {
@@ -21,8 +21,8 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         setupTests().then(
           function () {
+            global.setupGithubCollabAdapter();
             global.setupGithubAdminAdapter();
-            // setup tests
             var bag = {
               who: testSuite + '|before ',
               subId: null
@@ -155,10 +155,10 @@ describe(testSuite + testSuiteDesc,
           subscriptionIntegrationId: githubSubIntId
         };
 
-        global.ghcAdminAdapter.postNewSyncRepo(body,
+        global.ghcCollabAdapter.postNewSyncRepo(body,
           function (err, response) {
-            assert(!err, new Error(util.format('unable to post new sync repo' +
-            ' with body: %s err:%s, %s', body, err, util.inspect(response))));
+            assert(!err, util.format('unable to post new sync repo' +
+            ' with body: %s err:%s, %s', body, err, util.inspect(response)));
 
             var query = util.format('isDeleted=false&subscriptionIds=%s',
               subId);
@@ -207,7 +207,6 @@ describe(testSuite + testSuiteDesc,
     it('5. Can soft delete resources',
       function (done) {
         assert.isNotNull(syncRepoResourceId, 'syncRepo should not be null');
-
         var query = '';
         global.suAdapter.deleteResourceById(syncRepoResourceId, query,
           function (err, response) {
@@ -224,7 +223,6 @@ describe(testSuite + testSuiteDesc,
     it('6. Can hard delete resources',
       function (done) {
         assert.isNotNull(syncRepoResourceId, 'syncRepo should not be null');
-
         var query = 'hard=true';
         global.suAdapter.deleteResourceById(syncRepoResourceId, query,
           function (err, response) {
