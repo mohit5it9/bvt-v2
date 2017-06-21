@@ -12,9 +12,11 @@ describe(testSuite + testSuiteDesc,
     var githubSubIntId = null;
     var syncRepoResourceId = null;
     var rSyncResourceId = null;
+    var runShResourceId = null;
     var projectId = null;
     var projectName = null;
     var subId = null;
+    var buildId = null;
 
     this.timeout(0);
 
@@ -248,7 +250,136 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    it('4. Can soft delete resources',
+    it('3. Can trigger job',
+      function (done) {
+        var getRunShResource = new Promise(
+          function (resolve, reject) {
+            var runShSystemCode = _.findWhere(global.systemCodes,
+              {group: 'resource', name: 'runSh'}).code;
+            var query = util.format('isDeleted=false&subscriptionIds=%s&' +
+              'isJob=true&typeCodes=%s', subId, runShSystemCode);
+            global.suAdapter.getResources(query,
+              function (err, resources) {
+                if (err)
+                  return reject(new Error(util.format('unable to get' +
+                    ' resources for query:%s, err, %s, %s', query, err,
+                    resources)));
+                return resolve(_.first(resources).id);
+              }
+            );
+          }
+        );
+
+        getRunShResource.then(
+          function (resourceId) {
+            runShResourceId = resourceId;
+
+            var bag = {
+              who: util.format('%s|can trigger job', testSuite)
+            };
+            async.series(
+              [
+                triggerBuild.bind(null, bag),
+                verifyBuild.bind(null, bag)
+              ],
+              function (err) {
+                if (err)
+                  return done(new Error(util.format('Cannottrigger build ' +
+                    'for resource id: %s, err: %s, %s', runShResourceId, err)));
+                return done();
+              }
+            );
+          },
+          function () {
+            return done(new Error('Failed to trigger build for resource' +
+              ' id: %s', runShResourceId));
+          }
+        );
+      }
+    );
+
+    function triggerBuild(bag, next) {
+      var who = bag.who + '|' + triggerBuild.name;
+      logger.debug(who, 'Inside');
+
+      global.ghcAdminAdapter.triggerNewBuildByResourceId(runShResourceId, {},
+        function (err) {
+          return next(err);
+        }
+      );
+    }
+
+    function verifyBuild(bag, next) {
+      var expBackoff = backoff.exponential({
+        initialDelay: 1000, // ms
+        maxDelay: 2000 // max retry interval of 2 second
+      });
+      expBackoff.failAfter(30); // fail after 30 attempts
+      expBackoff.on('backoff',
+        function (number, delay) {
+          logger.info('No build for resource with id:', runShResourceId, 'yet.',
+            'Retrying after ', delay, ' ms');
+        }
+      );
+
+      expBackoff.on('ready',
+        function () {
+          var inCompleteStatusCodes = [
+            _.findWhere(global.systemCodes,
+              {group: 'status', name: 'queued'}).code,
+            _.findWhere(global.systemCodes,
+              {group: 'status', name: 'processing'}).code,
+            _.findWhere(global.systemCodes,
+              {group: 'status', name: 'waiting'}).code
+          ];
+          var query = util.format('resourceIds=%s&statusCodes=%s',
+            runShResourceId, inCompleteStatusCodes);
+          global.ghcAdminAdapter.getBuilds(query,
+            function (err, builds) {
+              if (err)
+                return next(new Error(util.format('Cannot get builds for ' +
+                  'resource id: %s, err: %s', runShResourceId, err)));
+              if (_.isEmpty(builds)) {
+                expBackoff.backoff();
+              } else {
+                buildId = _.first(builds).id;
+                expBackoff.reset();
+                return next();
+              }
+            }
+          );
+        }
+      );
+
+      // max number of backoffs reached
+      expBackoff.on('fail',
+        function () {
+          return next(new Error('Max number of backoffs reached'));
+        }
+      );
+
+      expBackoff.backoff();
+    }
+
+    it('4. Can cancel job',
+      function (done) {
+        assert.isNotNull(buildId, 'build should not be null');
+
+        var json = {
+          statusCode: _.findWhere(global.systemCodes,
+            {group: 'status', name: 'cancelled'}).code
+        };
+        global.ghcAdminAdapter.putBuildById(buildId, json,
+          function (err, response) {
+            assert(!err, util.format('cancel build failed for build with ' +
+              'id: %s err: %s, %s', buildId, err, util.inspect(response)));
+            return done();
+          }
+        );
+      }
+    );
+
+    it('5. Can soft delete resources',
       function (done) {
         assert.isNotNull(syncRepoResourceId, 'syncRepo should not be null');
 
@@ -262,7 +393,6 @@ describe(testSuite + testSuiteDesc,
           }
         );
       }
-
     );
 
     it('5. Can hard delete resources',
