@@ -250,53 +250,46 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    it('3. Can trigger job',
+    it('2. Can trigger job',
       function (done) {
-        var getRunShResource = new Promise(
-          function (resolve, reject) {
-            var runShSystemCode = _.findWhere(global.systemCodes,
-              {group: 'resource', name: 'runSh'}).code;
-            var query = util.format('isDeleted=false&subscriptionIds=%s&' +
-              'isJob=true&typeCodes=%s', subId, runShSystemCode);
-            global.suAdapter.getResources(query,
-              function (err, resources) {
-                if (err)
-                  return reject(new Error(util.format('unable to get' +
-                    ' resources for query:%s, err, %s, %s', query, err,
-                    resources)));
-                return resolve(_.first(resources).id);
-              }
-            );
-          }
-        );
-
-        getRunShResource.then(
-          function (resourceId) {
-            runShResourceId = resourceId;
-
-            var bag = {
-              who: util.format('%s|can trigger job', testSuite)
-            };
-            async.series(
-              [
-                triggerBuild.bind(null, bag),
-                verifyBuild.bind(null, bag)
-              ],
-              function (err) {
-                if (err)
-                  return done(new Error(util.format('Cannottrigger build ' +
-                    'for resource id: %s, err: %s, %s', runShResourceId, err)));
-                return done();
-              }
-            );
-          },
-          function () {
-            return done(new Error('Failed to trigger build for resource' +
-              ' id: %s', runShResourceId));
+        var bag = {
+          who: util.format('%s|can trigger job', testSuite)
+        };
+        async.series(
+          [
+            getRunShResource.bind(null, bag),
+            triggerBuild.bind(null, bag),
+            verifyBuild.bind(null, bag)
+          ],
+          function (err) {
+            if (err)
+              return done(new Error(util.format('Cannottrigger build ' +
+                'for resource id: %s, err: %s, %s', runShResourceId, err)));
+            return done();
           }
         );
       }
     );
+
+    function getRunShResource(bag, next) {
+      var who = bag.who + '|' + getRunShResource.name;
+      logger.debug(who, 'Inside');
+
+      var runShSystemCode = _.findWhere(global.systemCodes,
+        {group: 'resource', name: 'runSh'}).code;
+      var query = util.format('isDeleted=false&subscriptionIds=%s&' +
+        'isJob=true&typeCodes=%s', subId, runShSystemCode);
+      global.suAdapter.getResources(query,
+        function (err, resources) {
+          if (err || _.isEmpty(resources))
+            return next(new Error(util.format('unable to get' +
+              ' resources for query:%s, err, %s, %s', query, err,
+              resources)));
+          runShResourceId = _.first(resources).id;
+          return next();
+        }
+      );
+    }
 
     function triggerBuild(bag, next) {
       var who = bag.who + '|' + triggerBuild.name;
@@ -361,7 +354,7 @@ describe(testSuite + testSuiteDesc,
       expBackoff.backoff();
     }
 
-    it('4. Can cancel job',
+    it('3. Can cancel job',
       function (done) {
         assert.isNotNull(buildId, 'build should not be null');
 
@@ -379,7 +372,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('5. Can soft delete resources',
+    it('4. Can soft delete resources',
       function (done) {
         assert.isNotNull(syncRepoResourceId, 'syncRepo should not be null');
 
