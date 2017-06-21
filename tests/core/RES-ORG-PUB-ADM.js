@@ -107,7 +107,6 @@ describe(testSuite + testSuiteDesc,
               'body: %s, with err: %s, %s', util.inspect(body), err,
               util.inspect(subInt)));
 
-          logger.debug('Added subscription integration');
           // add subInt to nconf so it is tracked for cleanup
           githubSubIntId = subInt.id;
           global.saveResource(
@@ -143,10 +142,9 @@ describe(testSuite + testSuiteDesc,
 
     it('1. Can add a seed repo',
       function (done) {
-       // TODO: add meaningful error here
-        if (!projectId) return done(true);
-        if (!subId) return done(true);
-        if (!githubSubIntId) return done(true);
+        if (!projectId) return done(new Error('project id not found'));
+        if (!subId) return done(new Error('subInt id not found'));
+        if (!githubSubIntId) return done(new Error('githubSubIntId not found'));
 
         var resourceName = projectName + '_master';
         var body = {
@@ -161,7 +159,6 @@ describe(testSuite + testSuiteDesc,
           function (err, response) {
             assert(!err, new Error(util.format('unable to post new sync repo' +
             ' with body: %s err:%s, %s', body, err, util.inspect(response))));
-            logger.debug('Added resource');
 
             var query = util.format('isDeleted=false&subscriptionIds=%s',
               subId);
@@ -209,6 +206,8 @@ describe(testSuite + testSuiteDesc,
 
     it('5. Can soft delete resources',
       function (done) {
+        assert.isNotNull(syncRepoResourceId, 'syncRepo should not be null');
+
         var query = '';
         global.suAdapter.deleteResourceById(syncRepoResourceId, query,
           function (err, response) {
@@ -224,6 +223,8 @@ describe(testSuite + testSuiteDesc,
 
     it('6. Can hard delete resources',
       function (done) {
+        assert.isNotNull(syncRepoResourceId, 'syncRepo should not be null');
+
         var query = 'hard=true';
         global.suAdapter.deleteResourceById(syncRepoResourceId, query,
           function (err, response) {
