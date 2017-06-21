@@ -168,13 +168,11 @@ describe(testSuite + testSuiteDesc,
                 assert(!e, new Error(util.format('unable to get resources' +
                   ' for query:%s, err, %s, %s', query, err, resources)));
 
-                rSyncResourceId = _.first(
-                  _.where(resources, {isJob: true})).id;
+                rSyncResourceId = _.findWhere(resources, {isJob: true}).id;
                 assert.isNotNull(rSyncResourceId, 'rSyncReourceId should not' +
                   ' be null.');
 
-                syncRepoResourceId = _.first(
-                  _.where(resources, {isJob: false})).id;
+                syncRepoResourceId = _.findWhere(resources, {isJob: false}).id;
                 assert.isNotNull(syncRepoResourceId, 'syncRepoResourceId ' +
                   'should not be null');
                 global.saveResource(
@@ -208,7 +206,7 @@ describe(testSuite + testSuiteDesc,
             initialDelay: 1000, // ms
             maxDelay: 2000 // max retry interval of 2 seconds
           });
-          expBackoff.failAfter(15); // fail after 30 attempts(~30 sec)
+          expBackoff.failAfter(30); // fail after 30 attempts(~60 sec)
           expBackoff.on('backoff',
             function (number, delay) {
               logger.info('rSync in progress. Retrying after ', delay, ' ms');
@@ -226,8 +224,8 @@ describe(testSuite + testSuiteDesc,
                       builds)));
 
                   var build = _.first(builds);
-                  var successStatusCode = _.first(_.where(global.systemCodes,
-                    {name: 'success', group: 'status'})).code;
+                  var successStatusCode = _.findWhere(global.systemCodes,
+                    {name: 'success', group: 'status'}).code;
                   if (build.statusCode !== successStatusCode) {
                     expBackoff.backoff();
                   } else {
