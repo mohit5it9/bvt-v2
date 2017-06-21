@@ -231,8 +231,16 @@ describe(testSuite + testSuiteDesc,
             assert(!err, util.format('Cleanup failed to hard delete ' +
               'resource with id: %s err: %s, %s', syncRepoResourceId, err,
               util.inspect(response)));
-            syncRepoResourceId = null;
-            return done();
+            global.removeResource(
+              {
+                type: 'subInt',
+                id: githubSubIntId
+              },
+              function () {
+                syncRepoResourceId = null;
+                return done();
+              }
+            );
           }
         );
       }
