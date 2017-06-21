@@ -11,6 +11,7 @@ var testSuiteDesc = ' - TestSuite for Github Collab for login';
 describe(testSuite + testSuiteDesc,
   function () {
     var account = {};
+    var subscriptions = [];
     var githubSysIntId = null;
     this.timeout(0);
 
@@ -164,6 +165,40 @@ describe(testSuite + testSuiteDesc,
             // TODO : check if a list of subscriptions be checked to make the
             //        test more narrow. should also run locally
             assert.isNotEmpty(subs, 'Subscriptions should not be empty');
+            subscriptions = subs;
+          }
+        );
+      }
+    );
+
+    it('5. A user with repository push permission is a collaborator for the ' +
+      'subscription',
+      function (done) {
+        var currentSub =
+          _.findWhere(subscriptions, {orgName: global.GITHUB_ORG_NAME});
+        assert.isNotEmpty(currentSub,
+          'Current subscription should not be empty');
+        var query = util.format('subscriptionIds=%s', currentSub.id);
+        global.ghcCollabAdapter.getSubscriptionAccounts(query,
+          function (err, subAccounts) {
+            assert(!err, util.format('Unable to get subAccounts with error %s',
+              err));
+            if (err)
+              return done(new Error('',
+                err));
+            assert.isNotEmpty(subAccounts,
+              'SubscriptionAccounts should not be empty');
+            var collabSystemCode = _.findWhere(global.systemCodes,
+              {name: 'collaborator', group: 'roles'}).code;
+            var adminSystemCode = _.findWhere(global.systemCodes,
+              {name: 'admin', group: 'roles'}).code;
+            assert.isNotEmpty(_.where(subAccounts,
+              {roleCode: collabSystemCode}), 'User with push permission is ' +
+              'not collaborator');
+            assert.isEmpty(_.where(subAccounts,
+              {roleCode: adminSystemCode}), 'User with push permission is ' +
+              'having admin role');
+            return done();
           }
         );
       }
