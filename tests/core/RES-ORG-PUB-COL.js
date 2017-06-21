@@ -14,6 +14,8 @@ describe(testSuite + testSuiteDesc,
     var rSyncResourceId = null;
     var projectId = null;
     var projectName = null;
+    var runShResourceId = null;
+    var buildId = null;
     var subId = null;
 
     this.timeout(0);
@@ -223,6 +225,9 @@ describe(testSuite + testSuiteDesc,
                       'builds for query %s with err %s, %s', query, err,
                       builds)));
 
+                  if (_.isEmpty(builds))
+                    expBackoff.backoff(); // wait till builds are created
+
                   var build = _.first(builds);
                   var successStatusCode = _.first(_.where(global.systemCodes,
                     {name: 'success', group: 'status'})).code;
@@ -247,6 +252,128 @@ describe(testSuite + testSuiteDesc,
         }
       );
     }
+
+    it('2. Can trigger job',
+      function (done) {
+        var bag = {
+          who: util.format('%s|can trigger job', testSuite)
+        };
+        async.series(
+          [
+            getRunShResource.bind(null, bag),
+            triggerBuild.bind(null, bag),
+            verifyBuild.bind(null, bag)
+          ],
+          function (err) {
+            if (err)
+              return done(new Error(util.format('Cannottrigger build ' +
+                'for resource id: %s, err: %s, %s', runShResourceId, err)));
+            return done();
+          }
+        );
+      }
+    );
+
+    function getRunShResource(bag, next) {
+      var who = bag.who + '|' + getRunShResource.name;
+      logger.debug(who, 'Inside');
+
+      var runShSystemCode = _.findWhere(global.systemCodes,
+        {group: 'resource', name: 'runSh'}).code;
+      var query = util.format('isDeleted=false&subscriptionIds=%s&' +
+        'isJob=true&typeCodes=%s', subId, runShSystemCode);
+      global.suAdapter.getResources(query,
+        function (err, resources) {
+          if (err || _.isEmpty(resources))
+            return next(new Error(util.format('unable to get' +
+              ' resources for query:%s, err, %s, %s', query, err,
+              resources)));
+          runShResourceId = _.first(resources).id;
+          return next();
+        }
+      );
+    }
+
+    function triggerBuild(bag, next) {
+      var who = bag.who + '|' + triggerBuild.name;
+      logger.debug(who, 'Inside');
+
+      global.ghcCollabAdapter.triggerNewBuildByResourceId(runShResourceId, {},
+        function (err) {
+          return next(err);
+        }
+      );
+    }
+
+    function verifyBuild(bag, next) {
+      var expBackoff = backoff.exponential({
+        initialDelay: 1000, // ms
+        maxDelay: 2000 // max retry interval of 2 second
+      });
+      expBackoff.failAfter(30); // fail after 30 attempts
+      expBackoff.on('backoff',
+        function (number, delay) {
+          logger.info('No build for resource with id:', runShResourceId, 'yet.',
+            'Retrying after ', delay, ' ms');
+        }
+      );
+
+      expBackoff.on('ready',
+        function () {
+          var inCompleteStatusCodes = [
+            _.findWhere(global.systemCodes,
+              {group: 'status', name: 'queued'}).code,
+            _.findWhere(global.systemCodes,
+              {group: 'status', name: 'processing'}).code,
+            _.findWhere(global.systemCodes,
+              {group: 'status', name: 'waiting'}).code
+          ];
+          var query = util.format('resourceIds=%s&statusCodes=%s',
+            runShResourceId, inCompleteStatusCodes);
+          global.ghcCollabAdapter.getBuilds(query,
+            function (err, builds) {
+              if (err)
+                return next(new Error(util.format('Cannot get builds for ' +
+                  'resource id: %s, err: %s', runShResourceId, err)));
+              if (_.isEmpty(builds)) {
+                expBackoff.backoff();
+              } else {
+                buildId = _.first(builds).id;
+                expBackoff.reset();
+                return next();
+              }
+            }
+          );
+        }
+      );
+
+      // max number of backoffs reached
+      expBackoff.on('fail',
+        function () {
+          return next(new Error('Max number of backoffs reached'));
+        }
+      );
+
+      expBackoff.backoff();
+    }
+
+    it('3. Can cancel job',
+      function (done) {
+        assert.isNotNull(buildId, 'build should not be null');
+
+        var json = {
+          statusCode: _.findWhere(global.systemCodes,
+            {group: 'status', name: 'cancelled'}).code
+        };
+        global.ghcCollabAdapter.putBuildById(buildId, json,
+          function (err, response) {
+            assert(!err, util.format('cancel build failed for build with ' +
+              'id: %s err: %s, %s', buildId, err, util.inspect(response)));
+            return done();
+          }
+        );
+      }
+    );
 
 
     it('4. Can soft delete resources',

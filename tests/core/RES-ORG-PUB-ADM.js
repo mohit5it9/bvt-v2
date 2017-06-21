@@ -225,6 +225,9 @@ describe(testSuite + testSuiteDesc,
                       'builds for query %s with err %s, %s', query, err,
                       builds)));
 
+                  if (_.isEmpty(builds))
+                    expBackoff.backoff(); // wait till builds are created
+
                   var build = _.first(builds);
                   var successStatusCode = _.findWhere(global.systemCodes,
                     {name: 'success', group: 'status'}).code;
