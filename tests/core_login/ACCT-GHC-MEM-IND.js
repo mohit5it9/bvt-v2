@@ -10,6 +10,7 @@ describe(testSuite + testSuiteDesc,
   function () {
     var account = {};
     var githubSysIntId = null;
+    var subscriptions = null;
     this.timeout(0);
 
     before(
@@ -160,7 +161,43 @@ describe(testSuite + testSuiteDesc,
           function (subs) {
             // TODO : check if a list of subscriptions be checked to make the
             //        test more narrow. should also run locally
+            subscriptions = subs;
             assert.isNotEmpty(subs, 'Subscriptions should not be empty');
+          }
+        );
+      }
+    );
+
+    it('5. A user with repository pull permission is a member for the ' +
+      'project',
+      function (done) {
+        var currentSub =
+          _.findWhere(subscriptions, {orgName: global.GHC_OWNER_NAME});
+        assert.isNotEmpty(currentSub,
+          'Current subscription should not be empty');
+        var query = util.format('subscriptionIds=%s', currentSub.id);
+        global.ghcMemberAdapter.getProjectAccounts(query,
+          function (err, projectAccounts) {
+            assert(!err, util.format('Unable to get project Accounts with ' +
+              'error %s', err));
+            assert.isNotEmpty(projectAccounts,
+              'SubscriptionAccounts should not be empty');
+            var collabSystemCode = _.findWhere(global.systemCodes,
+              {name: 'collaborator', group: 'roles'}).code;
+            var memSystemCode = _.findWhere(global.systemCodes,
+              {name: 'member', group: 'roles'}).code;
+            var adminSystemCode = _.findWhere(global.systemCodes,
+              {name: 'admin', group: 'roles'}).code;
+            assert.isNotEmpty(_.where(projectAccounts,
+              {roleCode: memSystemCode}), 'User with pull permission is ' +
+              'not having member');
+            assert.isEmpty(_.where(projectAccounts,
+              {roleCode: adminSystemCode}), 'User with pull permission is ' +
+              'having admin role');
+            assert.isEmpty(_.where(projectAccounts,
+              {roleCode: collabSystemCode}), 'User with pull permission is ' +
+              'having collab role');
+            return done();
           }
         );
       }
