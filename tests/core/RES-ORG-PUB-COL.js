@@ -1,6 +1,7 @@
 'use strict';
 
 var setupTests = require('../../_common/setupTests.js');
+var backoff = require('backoff');
 
 var testSuite = 'RES-ORG-PUB-COL';
 var testSuiteDesc = ' - Validate resources for Github Org, public project ' +
@@ -167,13 +168,11 @@ describe(testSuite + testSuiteDesc,
                 assert(!e, new Error(util.format('unable to get resources' +
                   ' for query:%s, err, %s, %s', query, err, resources)));
 
-                rSyncResourceId = _.first(
-                  _.where(resources, {isJob: true})).id;
+                rSyncResourceId = _.findWhere(resources, {isJob: true}).id;
                 assert.isNotNull(rSyncResourceId, 'rSyncReourceId should not' +
                   ' be null.');
 
-                syncRepoResourceId = _.first(
-                  _.where(resources, {isJob: false})).id;
+                syncRepoResourceId = _.findWhere(resources, {isJob: false}).id;
                 assert.isNotNull(syncRepoResourceId, 'syncRepoResourceId ' +
                   'should not be null');
                 global.saveResource(
@@ -182,7 +181,15 @@ describe(testSuite + testSuiteDesc,
                     id: syncRepoResourceId
                   },
                   function () {
-                    return done();
+                    var syncDone = waitForRSyncToComplete();
+                    syncDone.then(
+                      function () {
+                        return done();
+                      },
+                      function (_err) {
+                        return done(_err);
+                      }
+                    );
                   }
                 );
               }
@@ -192,23 +199,61 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('2. rSync should finish syncing',
-      function (done) {
-        // TODO: add backoff logic here
-        logger.info(testSuite, 'sleeping for 10 seconds');
-        setTimeout(
-          function () {
-            return done();
-          }, 10000 // 10 seconds
-        );
-      }
-    );
+    function waitForRSyncToComplete() {
+      return new Promise(
+        function (resolve, reject) {
+          var expBackoff = backoff.exponential({
+            initialDelay: 1000, // ms
+            maxDelay: 2000 // max retry interval of 2 seconds
+          });
+          expBackoff.failAfter(30); // fail after 30 attempts(~60 sec)
+          expBackoff.on('backoff',
+            function (number, delay) {
+              logger.info('rSync in progress. Retrying after ', delay, ' ms');
+            }
+          );
+          expBackoff.on('ready',
+            function () {
+              // set account when ready
+              var query = util.format('resourceIds=%s', rSyncResourceId);
+              global.suAdapter.getBuilds(query,
+                function (err, builds) {
+                  if (err)
+                    return reject(new Error(util.format('Failed to get ' +
+                      'builds for query %s with err %s, %s', query, err,
+                      builds)));
 
-    it('5. Can soft delete resources',
+                  var build = _.first(builds);
+                  var successStatusCode = _.first(_.where(global.systemCodes,
+                    {name: 'success', group: 'status'})).code;
+                  if (build.statusCode !== successStatusCode) {
+                    expBackoff.backoff();
+                  } else {
+                    expBackoff.reset();
+                    return resolve();
+                  }
+                }
+              );
+            }
+          );
+
+          // max number of backoffs reached
+          expBackoff.on('fail',
+            function () {
+              return reject(new Error('Max number of backoffs reached'));
+            }
+          );
+          expBackoff.backoff();
+        }
+      );
+    }
+
+
+    it('4. Can soft delete resources',
       function (done) {
         assert.isNotNull(syncRepoResourceId, 'syncRepo should not be null');
         var query = '';
-        global.suAdapter.deleteResourceById(syncRepoResourceId, query,
+        global.ghcCollabAdapter.deleteResourceById(syncRepoResourceId, query,
           function (err, response) {
             assert(!err, util.format('Cleanup failed to soft delete ' +
               'resource with id: %s err: %s, %s', syncRepoResourceId, err,
@@ -220,17 +265,25 @@ describe(testSuite + testSuiteDesc,
 
     );
 
-    it('6. Can hard delete resources',
+    it('5. Can hard delete resources',
       function (done) {
         assert.isNotNull(syncRepoResourceId, 'syncRepo should not be null');
         var query = 'hard=true';
-        global.suAdapter.deleteResourceById(syncRepoResourceId, query,
+        global.ghcCollabAdapter.deleteResourceById(syncRepoResourceId, query,
           function (err, response) {
             assert(!err, util.format('Cleanup failed to hard delete ' +
               'resource with id: %s err: %s, %s', syncRepoResourceId, err,
               util.inspect(response)));
-            syncRepoResourceId = null;
-            return done();
+            global.removeResource(
+              {
+                type: 'subInt',
+                id: githubSubIntId
+              },
+              function () {
+                syncRepoResourceId = null;
+                return done();
+              }
+            );
           }
         );
       }
