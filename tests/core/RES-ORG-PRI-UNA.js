@@ -460,7 +460,7 @@ describe(testSuite + testSuiteDesc,
           {group: 'status', name: 'cancelled'}).code
       };
 
-      global.ghcAdminAdapter.putBuildById(buildId, json,
+      global.suAdapter.putBuildById(buildId, json,
         function (err, response) {
           if (err)
             return next(util.format('admin failed to cancel build with ' +
