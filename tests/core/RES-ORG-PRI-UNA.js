@@ -5,9 +5,9 @@ var backoff = require('backoff');
 global.logger = require('../../_common/logging/logger.js')(
   process.env.LOG_LEVEL);
 
-var testSuite = 'RES-IND-PRI-MEM';
+var testSuite = 'RES-ORG-PRI-UNA';
 var testSuiteDesc = ' - Validate resources for Github Individual, private ' +
-  'project for Member';
+  'project for public user';
 
 describe(testSuite + testSuiteDesc,
   function () {
@@ -26,7 +26,6 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         setupTests().then(
           function () {
-            global.setupGithubMemberAdapter();
             global.setupGithubAdminAdapter();
             var bag = {
               who: testSuite + '|before ',
@@ -161,10 +160,10 @@ describe(testSuite + testSuiteDesc,
           subscriptionIntegrationId: githubSubIntId
         };
 
-        global.ghcMemberAdapter.postNewSyncRepo(body,
+        global.pubAdapter.postNewSyncRepo(body,
           function (e, res) {
-            assert.strictEqual(e, 404, util.format('member should not post' +
-            ' new sync repo with body: %s err:%s, %s', body, e,
+            assert.strictEqual(e, 401, util.format('Public User should not ' +
+            'post new sync repo with body: %s err:%s, %s', body, e,
              util.inspect(res)));
 
             // now enable the project using admin
@@ -281,7 +280,7 @@ describe(testSuite + testSuiteDesc,
         async.series(
           [
             getRunShResource.bind(null, bag),
-            triggerBuildByMember.bind(null, bag),
+            triggerBuildByPublicUser.bind(null, bag),
             triggerBuildByAdmin.bind(null, bag),
             verifyBuild.bind(null, bag)
           ],
@@ -315,14 +314,14 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    function triggerBuildByMember(bag, next) {
-      var who = bag.who + '|' + triggerBuildByMember.name;
+    function triggerBuildByPublicUser(bag, next) {
+      var who = bag.who + '|' + triggerBuildByPublicUser.name;
       logger.debug(who, 'Inside');
 
-      global.ghcMemberAdapter.triggerNewBuildByResourceId(runShResourceId, {},
+      global.pubAdapter.triggerNewBuildByResourceId(runShResourceId, {},
         function (err) {
-          assert.strictEqual(err, 404,
-            'Member should not be able to trigger a build');
+          assert.strictEqual(err, 401,
+            'Public User should not be able to trigger a build');
           return next();
         }
       );
@@ -402,10 +401,10 @@ describe(testSuite + testSuiteDesc,
           statusCode: _.findWhere(global.systemCodes,
             {group: 'status', name: 'cancelled'}).code
         };
-        global.ghcMemberAdapter.putBuildById(buildId, json,
+        global.pubAdapter.putBuildById(buildId, json,
           function (e) {
-            assert.strictEqual(e, 404,
-              'member should not be able to cancel a job');
+            assert.strictEqual(e, 401,
+              'Public User should not be able to cancel a job');
             // now cancel by admin
             global.ghcAdminAdapter.putBuildById(buildId, json,
               function (err, response) {
@@ -423,9 +422,9 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         assert.isNotNull(syncRepoResourceId, 'syncRepo should not be null');
         var query = '';
-        global.ghcMemberAdapter.deleteResourceById(syncRepoResourceId, query,
+        global.pubAdapter.deleteResourceById(syncRepoResourceId, query,
           function (err, response) {
-            assert(err, util.format('Member should not soft delete ' +
+            assert(err, util.format('Public user should not soft delete ' +
               'resource with id: %s err: %s, %s', syncRepoResourceId, err,
               util.inspect(response)));
             return done();
@@ -439,9 +438,9 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         assert.isNotNull(syncRepoResourceId, 'syncRepo should not be null');
         var query = 'hard=true';
-        global.ghcMemberAdapter.deleteResourceById(syncRepoResourceId, query,
+        global.pubAdapter.deleteResourceById(syncRepoResourceId, query,
           function (err, response) {
-            assert(err, util.format('Member should not hard delete ' +
+            assert(err, util.format('Public user should not hard delete ' +
               'resource with id: %s err: %s, %s', syncRepoResourceId, err,
               util.inspect(response)));
             return done();
@@ -449,6 +448,27 @@ describe(testSuite + testSuiteDesc,
         );
       }
     );
+
+    function cancelBuild(bag, next) {
+      if (!buildId) return next();
+
+      var who = bag.who + '|' + deleteResource.name;
+      logger.info(who, 'cancelling build with id:', buildId);
+
+      var json = {
+        statusCode: _.findWhere(global.systemCodes,
+          {group: 'status', name: 'cancelled'}).code
+      };
+
+      global.suAdapter.putBuildById(buildId, json,
+        function (err, response) {
+          if (err)
+            return next(util.format('admin failed to cancel build with ' +
+              'id: %s err: %s, %s', buildId, err, util.inspect(response)));
+          return next();
+        }
+      );
+    }
 
     function deleteResource(bag, next) {
       var who = bag.who + '|' + deleteResource.name;
@@ -534,27 +554,6 @@ describe(testSuite + testSuiteDesc,
                 return next();
               }
             );
-        }
-      );
-    }
-
-    function cancelBuild(bag, next) {
-      if (!buildId) return next();
-
-      var who = bag.who + '|' + deleteResource.name;
-      logger.info(who, 'cancelling build with id:', buildId);
-
-      var json = {
-        statusCode: _.findWhere(global.systemCodes,
-          {group: 'status', name: 'cancelled'}).code
-      };
-
-      global.suAdapter.putBuildById(buildId, json,
-        function (err, response) {
-          if (err)
-            return next(util.format('admin failed to cancel build with ' +
-              'id: %s err: %s, %s', buildId, err, util.inspect(response)));
-          return next();
         }
       );
     }

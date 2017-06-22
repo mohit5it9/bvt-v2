@@ -517,6 +517,27 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
+    function cancelBuild(bag, next) {
+      if (!buildId) return next();
+
+      var who = bag.who + '|' + deleteResource.name;
+      logger.info(who, 'cancelling build with id:', buildId);
+
+      var json = {
+        statusCode: _.findWhere(global.systemCodes,
+          {group: 'status', name: 'cancelled'}).code
+      };
+
+      global.suAdapter.putBuildById(buildId, json,
+        function (err, response) {
+          if (err)
+            return next(util.format('admin failed to cancel build with ' +
+              'id: %s err: %s, %s', buildId, err, util.inspect(response)));
+          return next();
+        }
+      );
+    }
+
     after(
       function (done) {
         var who = testSuite + '|after';
@@ -525,6 +546,7 @@ describe(testSuite + testSuiteDesc,
         var bag = {who: who};
         async.series(
           [
+            cancelBuild.bind(null, bag),
             deleteResource.bind(null, bag),
             deleteSubInt.bind(null, bag)
           ],
