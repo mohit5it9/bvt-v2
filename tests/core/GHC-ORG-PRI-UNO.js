@@ -4,9 +4,9 @@
 var setupTests = require('../../_common/setupTests.js');
 var backoff = require('backoff');
 
-var testSuite = 'GHC-ORG-PRI-UNA';
+var testSuite = 'GHC-ORG-PRI-UNO';
 var testSuiteDesc = ' - TestSuite for Github Org, public project for' +
-  ' Unauthenticated Users';
+  ' Unauthorized Users';
 
 describe(testSuite + testSuiteDesc,
   function () {
@@ -18,7 +18,7 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         setupTests().then(
           function () {
-            // use a member adapter to simulate unauthenicated user signed up
+            // use a member adapter to simulate unauthorized user signed up
             // on Shippable
             global.setupGithubMemberAdapter();
             global.setupGithubAdminAdapter();
@@ -98,8 +98,8 @@ describe(testSuite + testSuiteDesc,
         };
         global.ghcMemberAdapter.enableProjectById(projectId, json,
           function (err, response) {
-            assert.strictEqual(err, 404, 'member cannot enable a project, err:',
-              err, response);
+            assert.strictEqual(err, 404, 'uauthorized user cannot enable ' +
+              'a project, err:', err, response);
             return done();
           }
         );
@@ -134,8 +134,8 @@ describe(testSuite + testSuiteDesc,
         var json = {propertyBag: {isPaused: true}};
         global.ghcMemberAdapter.putProjectById(projectId, json,
           function (err, response) {
-            assert.strictEqual(err, 404, 'member shouldnt be able to pause ' +
-              'project, err: %s', err, response);
+            assert.strictEqual(err, 404, 'unauthorized user shouldnt be ' +
+              'able to pause project, err: %s', err, response);
             return done();
           }
         );
@@ -155,8 +155,9 @@ describe(testSuite + testSuiteDesc,
             // try resume if enable is success
             global.ghcMemberAdapter.putProjectById(projectId, json,
               function (e, response) {
-                assert.strictEqual(e, 404, util.format('Member cannot ' +
-                  'resume projectId: %s, err: %s', projectId, e, response));
+                assert.strictEqual(e, 404, util.format('Unauthorized user ' +
+                  ' cannot resume projectId: %s, err: %s', projectId, e,
+                  response));
                 return done();
               }
             );
@@ -340,9 +341,9 @@ describe(testSuite + testSuiteDesc,
         };
         global.ghcMemberAdapter.putProjectById(projectId, json,
           function (err, response) {
-            assert.strictEqual(err, 404, util.format('Member should not ' +
-              'reset cache project id: %s, err: %s, %s', projectId, err,
-              response));
+            assert.strictEqual(err, 404, util.format('Unauthorized user ' +
+              ' should not reset cache project id: %s, err: %s, %s',
+              projectId, err, response));
             return done();
           }
         );
@@ -354,8 +355,9 @@ describe(testSuite + testSuiteDesc,
         var json = {projectId: projectId};
         global.ghcMemberAdapter.resetProjectById(projectId, json,
           function (err, response) {
-            assert.strictEqual(err, 404, util.format('Member should not ' +
-                'reset project id: %s, err: %s, %s', projectId, err, response));
+            assert.strictEqual(err, 404, util.format('Unauthorized user ' +
+              'should not reset project id: %s, err: %s, %s', projectId, err,
+              response));
             return done();
           }
         );
@@ -367,8 +369,8 @@ describe(testSuite + testSuiteDesc,
         var json = {projectId: projectId};
         global.ghcMemberAdapter.deleteProjectById(projectId, json,
           function (err, response) {
-            assert.strictEqual(err, 404, util.format('Member should not ' +
-              'delete project id: %s, err: %s, %s', projectId, err,
+            assert.strictEqual(err, 404, util.format('Unauthorized user ' +
+              'should not delete project id: %s, err: %s, %s', projectId, err,
               response));
             return done();
           }
