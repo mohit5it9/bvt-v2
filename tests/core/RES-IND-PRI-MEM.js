@@ -411,6 +411,7 @@ describe(testSuite + testSuiteDesc,
               function (err, response) {
                 assert(!err, util.format('admin failed to cancel build with ' +
                   'id: %s err: %s, %s', buildId, err, util.inspect(response)));
+                buildId = null;
                 return done();
               }
             );
@@ -461,8 +462,10 @@ describe(testSuite + testSuiteDesc,
           hardDelete.bind(null, innerBag)
         ],
         function (err) {
-          if (err)
-            return next(err);
+          if (err) {
+            logger.warn(who, err);
+            return next();
+          }
 
           // remove from nconf state if deletion is successful
           global.removeResource(
@@ -519,21 +522,22 @@ describe(testSuite + testSuiteDesc,
 
       global.suAdapter.deleteSubscriptionIntegrationById(githubSubIntId,
         function (err, response) {
-          if (err)
+          if (err) {
             logger.warn(who, util.format('Cleanup-failed to delete the ' +
               'subInt with id: %s, err: %s, %s', githubSubIntId, err,
               util.inspect(response)));
-          else
+            return next();
+          }
             // remove from nconf state if deletion is successful
-            global.removeResource(
-              {
-                type: 'subInt',
-                id: githubSubIntId
-              },
-              function () {
-                return next();
-              }
-            );
+          global.removeResource(
+            {
+              type: 'subInt',
+              id: githubSubIntId
+            },
+            function () {
+              return next();
+            }
+          );
         }
       );
     }
@@ -552,7 +556,7 @@ describe(testSuite + testSuiteDesc,
       global.suAdapter.putBuildById(buildId, json,
         function (err, response) {
           if (err)
-            return next(util.format('admin failed to cancel build with ' +
+            logger.warn(util.format('admin failed to cancel build with ' +
               'id: %s err: %s, %s', buildId, err, util.inspect(response)));
           return next();
         }

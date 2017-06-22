@@ -160,8 +160,8 @@ describe(testSuite + testSuiteDesc,
 
         global.ghcAdminAdapter.postNewSyncRepo(body,
           function (err, response) {
-            assert(!err, new Error(util.format('unable to post new sync repo' +
-            ' with body: %s err:%s, %s', body, err, util.inspect(response))));
+            assert(!err, util.format('unable to post new sync repo' +
+            ' with body: %s err:%s, %s', body, err, util.inspect(response)));
 
             var query = util.format('isDeleted=false&subscriptionIds=%s',
               subId);
@@ -372,6 +372,7 @@ describe(testSuite + testSuiteDesc,
           function (err, response) {
             assert(!err, util.format('cancel build failed for build with ' +
               'id: %s err: %s, %s', buildId, err, util.inspect(response)));
+            buildId = null;
             return done();
           }
         );
@@ -430,8 +431,10 @@ describe(testSuite + testSuiteDesc,
           hardDelete.bind(null, innerBag)
         ],
         function (err) {
-          if (err)
-            return next(err);
+          if (err) {
+            logger.warn(who, err);
+            return next();
+          }
 
           // remove from nconf state if deletion is successful
           global.removeResource(
@@ -491,28 +494,19 @@ describe(testSuite + testSuiteDesc,
           if (err) {
             logger.warn(who, util.format('Cleanup-failed to delete the ' +
               'subInt with id: %s, err: %s, %s', githubSubIntId, err,
-              util.inspect(response)));
-            global.saveResource(
-              {
-                type: 'subInt',
-                id: githubSubIntId
-              },
-              function () {
-                return next();
-              }
-            );
-          } else {
-            // remove from nconf state if deletion is successful
-            global.removeResource(
-              {
-                type: 'subInt',
-                id: githubSubIntId
-              },
-              function () {
-                return next();
-              }
-            );
+              response));
+            return next();
           }
+          // remove from nconf state if deletion is successful
+          global.removeResource(
+            {
+              type: 'subInt',
+              id: githubSubIntId
+            },
+            function () {
+              return next();
+            }
+          );
         }
       );
     }
@@ -531,7 +525,7 @@ describe(testSuite + testSuiteDesc,
       global.suAdapter.putBuildById(buildId, json,
         function (err, response) {
           if (err)
-            return next(util.format('admin failed to cancel build with ' +
+            logger.warn(util.format('admin failed to cancel build with ' +
               'id: %s err: %s, %s', buildId, err, util.inspect(response)));
           return next();
         }
