@@ -4,9 +4,9 @@
 var setupTests = require('../../_common/setupTests.js');
 var backoff = require('backoff');
 
-var testSuite = 'GHC-IND-PUB-MEM';
-var testSuiteDesc = ' - TestSuite for Github Individual, public project for' +
-  ' Member';
+var testSuite = 'GHC-ORG-PRI-UNA';
+var testSuiteDesc = ' - TestSuite for Github Org, public project for' +
+  ' Unauthenticated Users';
 
 describe(testSuite + testSuiteDesc,
   function () {
@@ -18,6 +18,8 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         setupTests().then(
           function () {
+            // use a member adapter to simulate unauthenicated user signed up
+            // on Shippable
             global.setupGithubMemberAdapter();
             global.setupGithubAdminAdapter();
             var bag = {
@@ -89,7 +91,7 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    it('1. CANNOT Enable a public project',
+    it('13. CANNOT Enable a public project',
       function (done) {
         var json = {
           type: 'ci'
@@ -104,7 +106,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('2. Can Synchonize a public project',
+    it('14. Can Synchonize a public project',
       function (done) {
         var json = {type: 'ci'};
         global.ghcAdminAdapter.enableProjectById(projectId, json,
@@ -127,7 +129,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('3. CANNOT pause a public project',
+    it('15. CANNOT pause a public project',
       function (done) {
         var json = {propertyBag: {isPaused: true}};
         global.ghcMemberAdapter.putProjectById(projectId, json,
@@ -140,7 +142,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('4. CANNOT resume a public project',
+    it('16. CANNOT resume a public project',
       function (done) {
         // first enable using su adapter
         var json = {propertyBag: {isPaused: true}};
@@ -163,7 +165,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('5. CANNOT trigger manual builds',
+    it('17. CANNOT trigger manual builds',
       function (done) {
         var json = {type: 'push'};
         global.ghcMemberAdapter.triggerNewBuildByProjectId(projectId, json,
@@ -242,7 +244,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('6. Can view builds for public project',
+    it('18. Can view builds for public project',
       function (done) {
         var query = util.format('projectIds=%s', projectId);
         global.ghcMemberAdapter.getRuns(query,
@@ -258,7 +260,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('7. Can view consoles',
+    it('19. Can view consoles',
       function (done) {
         var bag = {
           runId: runId,
@@ -301,7 +303,7 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    it('8. CANNOT cancel builds for public project',
+    it('10. CANNOT cancel builds for public project',
       function (done) {
         global.ghcMemberAdapter.cancelRunById(runId,
           function (err, response) {
@@ -314,7 +316,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('9. CANNOT run custom build',
+    it('21. CANNOT run custom build',
       function (done) {
         var json = {type: 'push', globalEnv: {key: 'value'}};
         global.ghcMemberAdapter.triggerNewBuildByProjectId(projectId, json,
@@ -328,7 +330,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('10. CANNOT reset cache',
+    it('22. CANNOT reset cache',
       function (done) {
         var json = {
           propertyBag: {
@@ -347,7 +349,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('11. CANNOT Reset a public project',
+    it('23. CANNOT Reset a public project',
       function (done) {
         var json = {projectId: projectId};
         global.ghcMemberAdapter.resetProjectById(projectId, json,
@@ -360,7 +362,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('12. CANNOT Delete a public project',
+    it('24. CANNOT Delete a public project',
       function (done) {
         var json = {projectId: projectId};
         global.ghcMemberAdapter.deleteProjectById(projectId, json,
