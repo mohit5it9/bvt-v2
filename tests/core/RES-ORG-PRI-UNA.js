@@ -503,7 +503,12 @@ describe(testSuite + testSuiteDesc,
             return next(util.format('Cleanup failed to delete ' +
               'resource with id: %s err: %s, %s', syncRepoResourceId, err,
               util.inspect(response)));
-          return next();
+          setTimeout(
+            function () {
+              logger.info(testSuite, 'sleeping 3 seconds before hard delete');
+              return next();
+            }, 3000
+          );
         }
       );
     }
