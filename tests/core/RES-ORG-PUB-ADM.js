@@ -323,16 +323,10 @@ describe(testSuite + testSuiteDesc,
 
       expBackoff.on('ready',
         function () {
-          var inCompleteStatusCodes = [
-            _.findWhere(global.systemCodes,
-              {group: 'status', name: 'queued'}).code,
-            _.findWhere(global.systemCodes,
-              {group: 'status', name: 'processing'}).code,
-            _.findWhere(global.systemCodes,
-              {group: 'status', name: 'waiting'}).code
-          ];
+          var processingStatusCode = _.findWhere(global.systemCodes,
+              {group: 'status', name: 'processing'}).code;
           var query = util.format('resourceIds=%s&statusCodes=%s',
-            runShResourceId, inCompleteStatusCodes);
+            runShResourceId, processingStatusCode);
           global.ghcAdminAdapter.getBuilds(query,
             function (err, builds) {
               if (err)
