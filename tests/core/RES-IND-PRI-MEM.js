@@ -243,7 +243,7 @@ describe(testSuite + testSuiteDesc,
                       builds)));
 
                   if (_.isEmpty(builds))
-                    expBackoff.backoff(); // wait till builds are created
+                    return expBackoff.backoff(); // wait till builds are created
 
                   // TODO; remove the log later
                   logger.info('got build: ', util.inspect(builds));
