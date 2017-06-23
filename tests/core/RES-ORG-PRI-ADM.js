@@ -380,7 +380,12 @@ describe(testSuite + testSuiteDesc,
             assert(!err, util.format('Cleanup failed to soft delete ' +
               'resource with id: %s err: %s, %s', syncRepoResourceId, err,
               util.inspect(response)));
-            return done();
+            setTimeout(
+              function () {
+                logger.info(testSuite, 'sleeping 5 seconds before hard delete');
+                return done();
+              }, 5000
+            );
           }
         );
       }
