@@ -244,9 +244,6 @@ describe(testSuite + testSuiteDesc,
                   if (_.isEmpty(builds))
                     return expBackoff.backoff(); // wait till builds are created
 
-                  // TODO; remove the log later
-                  logger.info('got build: ', util.inspect(builds));
-
                   var build = _.first(builds);
                   var successStatusCode = _.first(_.where(global.systemCodes,
                     {name: 'success', group: 'status'})).code;
