@@ -33,6 +33,7 @@ function setup() {
       nconf.load();
       resourcesToClean = nconf.get('BVT_RESOURCES');
 
+      // TODO: instead of deleting the entire file, removeResources when deleted
       if (!_.isEmpty(resourcesToClean))
         deleteResources(resourcesToClean);
     },
