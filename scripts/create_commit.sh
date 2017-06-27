@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export RES_GH_SSH="bvt_v2_owner_ssh_key"
+export RES_GH_SSH="bvt_v2_ghc_owner_ssh_key"
 
 export RES_GH_SSH_UP=$(echo $RES_GH_SSH | awk '{print toupper($0)}')
 export RES_GH_SSH_META=$(eval echo "$"$RES_GH_SSH_UP"_META")
@@ -8,8 +8,6 @@ export RES_GH_SSH_META=$(eval echo "$"$RES_GH_SSH_UP"_META")
 add_ssh_key() {
  pushd "$RES_GH_SSH_META"
  echo "Extracting ssh key"
- echo "------------ Integration is -----------------------"
- cat "integration.json" 
  echo "-----------------------------------"
  cat "integration.json"  | jq -r '.privateKey' > gh_ssh.key
  chmod 600 gh_ssh.key

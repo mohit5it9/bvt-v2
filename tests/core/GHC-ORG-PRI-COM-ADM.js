@@ -56,7 +56,8 @@ describe(testSuite + testSuiteDesc,
         function (err, projects) {
           if (err || _.isEmpty(projects))
             return next(util.format('cannot get project for ' +
-              'query: %s, Err: %s', query, err));
+              'query: %s, Err: %s, response: %s', query, err,
+              util.inspect(projects)));
           var project = _.first(projects);
           projectId = project.id;
           return next();
@@ -72,18 +73,27 @@ describe(testSuite + testSuiteDesc,
         type: 'ci'
       };
       global.ghcAdminAdapter.enableProjectById(projectId, json,
-        function (err) {
+        function (err, response) {
           if (err)
             return next(util.format('cannot enable private ' +
-              'project with id:%s', projectId));
-          return next();
+              'project with id: %s, response: %s', projectId,
+              util.inspect(response)));
+          global.saveResource(
+            {
+              type: 'project',
+              id: projectId
+            },
+            function () {
+              return next();
+            }
+          );
         }
       );
     }
 
     it('1. Can trigger a run through commit',
       function (done) {
-        var bag = {who: 'in test 1'};
+        var bag = {who: testSuite + '|1|'};
         async.series(
           [
             runCommitScript.bind(null, bag),
@@ -151,7 +161,8 @@ describe(testSuite + testSuiteDesc,
             function (err, runs) {
               if (err)
                 return next(new Error(util.format('Cannot get builds for ' +
-                  'project id: %s, err: %s', projectId, err)));
+                  'project id: %s, err: %s, response: %s', projectId, err,
+                  util.inspect(runs))));
               if (_.isEmpty(runs)) {
                 expBackoff.backoff();
               } else {
@@ -180,7 +191,7 @@ describe(testSuite + testSuiteDesc,
           if (err)
             return next(new Error(util.format('Cannot cancel build id: %d ' +
               'for project id: %s, err: %s, %s', runId, projectId, err,
-              response)));
+              util.inspect(response))));
           logger.info('Cancelled build');
           return next();
         }
@@ -193,13 +204,24 @@ describe(testSuite + testSuiteDesc,
         if (projectId)
           global.ghcAdminAdapter.deleteProjectById(projectId, {},
             function (err, response) {
-              if (err)
+              if (err) {
                 logger.warn(testSuite,
                   util.format('Cleanup-failed to delete ' +
-                  'the project id: %s, err: %s, %s', projectId, err,
+                  'the project id: %s, err: %s, response: %s', projectId, err,
                   util.inspect(response))
                 );
-              return done();
+                return done();
+              }
+              // remove from nconf state if deletion is successful
+              global.removeResource(
+                {
+                  type: 'project',
+                  id: projectId
+                },
+                function () {
+                  return done();
+                }
+              );
             }
           );
       }
