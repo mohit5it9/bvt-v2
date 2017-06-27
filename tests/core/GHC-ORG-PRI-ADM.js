@@ -328,16 +328,16 @@ describe(testSuite + testSuiteDesc,
         );
       }
     );
-    // do cleanup of all the resources. if cleanup fails, resource will
-    // be tracked in nconf
+
     after(
       function (done) {
-        // delete project
         if (projectId)
-          global.ghcAdminAdapter.deleteProjectById(projectId, {},
-            function (err) {
+          global.suAdapter.deleteProjectById(projectId, {},
+            function (err, response) {
               if (err) {
-                logger.warn(testSuite, 'Cleanup-failed to delete the project');
+                logger.warn(testSuite, util.format('Cleanup-failed to delete' +
+                  ' the project with id:%s, err: %s, %s', projectId, err,
+                  response));
                 global.saveResource(
                   {
                     type: 'project',
