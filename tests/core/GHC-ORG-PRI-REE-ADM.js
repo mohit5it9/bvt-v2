@@ -2,7 +2,6 @@
 
 var setupTests = require('../../_common/setupTests.js');
 var GithubAdapter = require('../../_common/github/Adapter.js');
-var spawn = require('child_process').spawn;
 var backoff = require('backoff');
 
 var testSuite = 'GHC-ORG-PRI-REE-ADM';
@@ -122,7 +121,6 @@ describe(testSuite + testSuiteDesc,
         var bag = {who: testSuite + '|1|'};
         async.series(
           [
-            runTagScript.bind(null, bag),
             createRelease.bind(null, bag),
             verifyBuild.bind(null, bag)
           ],
@@ -139,41 +137,17 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    function runTagScript(bag, next) {
-      var who = bag.who + '|' + runTagScript.name;
-      logger.debug(who, 'Inside');
-
-      tag = new Date().toISOString().replace(/[-.:]/g, '/') + '/release';
-      var child = spawn('scripts/create_tag.sh',
-        {env: {TAG_NAME: tag}});
-
-      child.stdout.on('data',
-        function (data) {
-          var str = '' + data; // converts output to string
-          str = str.replace(/\s+$/g, ''); // replace trailing newline & space
-          console.log(str);
-        }
-      );
-      child.on('close',
-        function (code) {
-          if (code > 0) {
-            logger.error(who, util.format('%s failed to create tag', code));
-            return next('failed to create tag');
-          }
-          return next();
-        }
-      );
-    }
-
     function createRelease(bag, next) {
       var who = bag.who + '|' + createRelease.name;
       logger.debug(who, 'Inside');
 
+      tag = new Date().toISOString().replace(/[-.:]/g, '/') + '/release';
       githubAdapter.createRelease(projectFullName, tag, 'master', tag, tag,
         false, false,
         function (err, response) {
           if (err) return next(new Error(util.format('Failed to create ' +
-            'release with error: %s, response: %s', err, response)));
+            'release with error: %s, response: %s', err,
+            util.inspect(response))));
           logger.info('Created release with name: ' + tag);
           return next();
         }
