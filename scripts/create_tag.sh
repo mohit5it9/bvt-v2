@@ -5,6 +5,10 @@ export RES_GH_SSH="bvt_v2_ghc_owner_ssh_key"
 export RES_GH_SSH_UP=$(echo $RES_GH_SSH | awk '{print toupper($0)}')
 export RES_GH_SSH_META=$(eval echo "$"$RES_GH_SSH_UP"_META")
 
+if [ -z $TAG_NAME ]; then
+  export TAG_NAME=$(date "+date%y/%m/%d/time%H/%M/%S")
+fi
+
 add_ssh_key() {
  pushd "$RES_GH_SSH_META"
  echo "Extracting ssh key"
@@ -28,7 +32,7 @@ git clone git@github.com:shiptest-github-organization-1/shiptest_org_private_pro
 cd shiptest_org_private_project_1
 
 echo "############ create tag ############"
-git tag $(date "+date%y/%m/%d/time%H/%M/%S") 2>&1
+git tag $TAG_NAME 2>&1
 
 echo "########### pushing to git ##########"
 git push origin --tags 2>&1

@@ -1,17 +1,21 @@
 'use strict';
 
 var setupTests = require('../../_common/setupTests.js');
+var GithubAdapter = require('../../_common/github/Adapter.js');
 var spawn = require('child_process').spawn;
 var backoff = require('backoff');
 
-var testSuite = 'GHC-ORG-PRI-TAG-ADM';
-var testSuiteDesc = ' - TestSuite for Github Org, private project tag ' +
+var testSuite = 'GHC-ORG-PRI-REE-ADM';
+var testSuiteDesc = ' - TestSuite for Github Org, private project release ' +
   'build for admin';
 
 describe(testSuite + testSuiteDesc,
   function () {
     var projectId = null;
+    var projectFullName = null;
     var runId = null;
+    var tag = null;
+    var githubAdapter = null;
     this.timeout(0);
 
     before(
@@ -21,6 +25,8 @@ describe(testSuite + testSuiteDesc,
             var who = testSuite + '|before';
             logger.debug(who, 'Inside');
 
+            githubAdapter = new GithubAdapter(global.githubOwnerAccessToken,
+              global.GHC_ENDPOINT);
             global.setupGithubAdminAdapter();
 
             var bag = {
@@ -30,7 +36,7 @@ describe(testSuite + testSuiteDesc,
               [
                 getProject.bind(null, bag),
                 enableProject.bind(null, bag),
-                enableTagBuild.bind(null, bag)
+                enableReleaseBuild.bind(null, bag)
               ],
               function (err) {
                 if (err)
@@ -61,6 +67,7 @@ describe(testSuite + testSuiteDesc,
               util.inspect(projects)));
           var project = _.first(projects);
           projectId = project.id;
+          projectFullName = project.fullName;
           return next();
         }
       );
@@ -92,17 +99,17 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    function enableTagBuild(bag, next) {
-      var who = bag.who + '|' + enableTagBuild.name;
+    function enableReleaseBuild(bag, next) {
+      var who = bag.who + '|' + enableReleaseBuild.name;
       logger.debug(who, 'Inside');
 
       var json = {
-        propertyBag: {enableTagBuild: true}
+        propertyBag: {enableReleaseBuild: true}
       };
       global.ghcAdminAdapter.putProjectById(projectId, json,
         function (err, response) {
           if (err)
-            return next(util.format('cannot enable tag build for ' +
+            return next(util.format('cannot enable release build for ' +
               'project with id: %s, response: %s', projectId,
               util.inspect(response)));
           return next();
@@ -110,18 +117,19 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    it('1. Can trigger a run through tag',
+    it('1. Can trigger a run through release',
       function (done) {
         var bag = {who: testSuite + '|1|'};
         async.series(
           [
             runTagScript.bind(null, bag),
+            createRelease.bind(null, bag),
             verifyBuild.bind(null, bag)
           ],
           function (err) {
             if (err) {
               logger.warn(bag.who, 'done async, err: ', err);
-              return done(new Error(util.format('Cannot create tag for ' +
+              return done(new Error(util.format('Cannot create release for ' +
                 'project id: %s, err: %s', projectId, err)));
             }
             return done();
@@ -135,7 +143,9 @@ describe(testSuite + testSuiteDesc,
       var who = bag.who + '|' + runTagScript.name;
       logger.debug(who, 'Inside');
 
-      var child = spawn('scripts/create_tag.sh');
+      tag = new Date().toISOString().replace(/[-.:]/g, '/') + '/release';
+      var child = spawn('scripts/create_tag.sh',
+        {env: {TAG_NAME: tag}});
 
       child.stdout.on('data',
         function (data) {
@@ -155,6 +165,21 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
+    function createRelease(bag, next) {
+      var who = bag.who + '|' + createRelease.name;
+      logger.debug(who, 'Inside');
+
+      githubAdapter.createRelease(projectFullName, tag, 'master', tag, tag,
+        false, false,
+        function (err, response) {
+          if (err) return next(new Error(util.format('Failed to create ' +
+            'release with error: %s, response: %s', err, response)));
+          logger.info('Created release with name: ' + tag);
+          return next();
+        }
+      );
+    }
+
     // exp backoff and check if the build got triggered
     function verifyBuild(bag, next) {
       var who = bag.who + '|' + verifyBuild.name;
@@ -167,14 +192,14 @@ describe(testSuite + testSuiteDesc,
       expBackoff.failAfter(15); // fail after 15 attempts(30 sec)
       expBackoff.on('backoff',
         function (number, delay) {
-          logger.info('No tag build for project with id:', projectId, 'yet.',
-            'Retrying after ', delay, ' ms');
+          logger.info('No release build for project with id:', projectId,
+            'yet.', 'Retrying after ', delay, ' ms');
         }
       );
 
       expBackoff.on('ready',
         function () {
-          var query = util.format('isGitTag=true&projectIds=%s',
+          var query = util.format('isRelease=true&projectIds=%s',
             projectId);
           global.ghcAdminAdapter.getRuns(query,
             function (err, runs) {

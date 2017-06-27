@@ -713,3 +713,33 @@ Adapter.prototype.getPullRequestFiles =
         callback(err, allFiles);
     }
   };
+
+Adapter.prototype.createRelease =
+  function (fullName, tagName, targetCommitish, name, body, isDraft,
+    isPrerelease, callback) {
+    /*  POST /repos/:owner/:repo/releases
+     *   :tag_name The name of the tag
+     *   :target_commitish Specifies the commitish value that determines where
+     *                     the Git tag is created from. Can be any branch or
+     *                     commit SHA. Unused if the Git tag already exists.
+     *                     Default: the repository's default
+     *                     branch (usually master)
+     *   name: The name of the release
+     *   body: Text describing the contents of the tag
+     *   draft: true to create a draft (unpublished) release,
+     *          false to create a published one. Default: false
+     *   prerelease: true to identify the release as a prerelease.
+     *               false to identify the release as a full release.
+     *               Default: false
+     */
+    var url = '/repos/' + fullName + '/releases';
+    var json = {
+      tag_name: tagName,
+      target_commitish: targetCommitish,
+      name: name,
+      body: body,
+      draft: isDraft,
+      prerelease: isPrerelease
+    };
+    this.post(url, json, callback);
+  };
