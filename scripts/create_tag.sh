@@ -32,3 +32,5 @@ git tag $(date "+date%y/%m/%d/time%H/%M/%S") 2>&1
 
 echo "########### pushing to git ##########"
 git push origin --tags 2>&1
+
+rm -rf shiptest_org_private_project_1

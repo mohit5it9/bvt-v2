@@ -36,3 +36,5 @@ git commit --amend --no-edit 2>&1
 
 echo "########### pushing to git ##########"
 git push -f origin master 2>&1
+
+rm -rf shiptest_org_private_project_1
