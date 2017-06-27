@@ -113,7 +113,7 @@ describe(testSuite + testSuiteDesc,
 
     it('5. CANNOT trigger manual builds',
       function (done) {
-        var json = {type: 'push'};
+        var json = {branchName: 'master'};
         global.pubAdapter.triggerNewBuildByProjectId(projectId, json,
           function (err, response) {
             assert.strictEqual(err, 401, util.format('should not trigger ' +
@@ -269,7 +269,7 @@ describe(testSuite + testSuiteDesc,
 
     it('9. CANNOT run custom build',
       function (done) {
-        var json = {type: 'push', globalEnv: {key: 'value'}};
+        var json = {branchName: 'master', globalEnv: {key: 'value'}};
         global.pubAdapter.triggerNewBuildByProjectId(projectId, json,
           function (err, response) {
             assert.strictEqual(err, 401, util.format('Cannot trigger custom ' +

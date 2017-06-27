@@ -168,7 +168,7 @@ describe(testSuite + testSuiteDesc,
 
     it('17. CANNOT trigger manual builds',
       function (done) {
-        var json = {type: 'push'};
+        var json = {branchName: 'master'};
         global.ghcMemberAdapter.triggerNewBuildByProjectId(projectId, json,
           function (err, response) {
             assert.strictEqual(err, 404, util.format('should not trigger ' +
@@ -319,7 +319,7 @@ describe(testSuite + testSuiteDesc,
 
     it('21. CANNOT run custom build',
       function (done) {
-        var json = {type: 'push', globalEnv: {key: 'value'}};
+        var json = {branchName: 'master', globalEnv: {key: 'value'}};
         global.ghcMemberAdapter.triggerNewBuildByProjectId(projectId, json,
           function (err, response) {
             assert.strictEqual(err, 404, util.format('Cannot trigger custom ' +
