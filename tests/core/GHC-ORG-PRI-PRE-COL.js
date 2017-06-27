@@ -248,9 +248,11 @@ describe(testSuite + testSuiteDesc,
           global.suAdapter.deleteProjectById(projectId, {},
             function (err, response) {
               if (err) {
-                logger.warn(testSuite, util.format('Cleanup-failed to delete' +
-                  ' the project with id:%s, err: %s, %s', projectId, err,
-                  util.inspect(response)));
+                logger.warn(testSuite,
+                  util.format('Cleanup-failed to delete the project with id:' +
+                    '%s, err: %s, %s', projectId, err, util.inspect(response)
+                  )
+                );
                 global.saveResource(
                   {
                     type: 'project',
@@ -269,3 +271,4 @@ describe(testSuite + testSuiteDesc,
     );
   }
 );
+
