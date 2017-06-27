@@ -335,7 +335,7 @@ describe(testSuite + testSuiteDesc,
               if (err) {
                 logger.warn(testSuite, util.format('Cleanup-failed to delete' +
                   ' the project with id:%s, err: %s, %s', projectId, err,
-                  response));
+                  util.inspect(response)));
                 global.saveResource(
                   {
                     type: 'project',
