@@ -127,7 +127,9 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         var triggerBuild = new Promise(
           function (resolve, reject) {
-            var json = {type: 'push'};
+            var json = {
+              branchName: 'master'
+            };
             global.ghcAdminAdapter.triggerNewBuildByProjectId(projectId, json,
               function (err, response) {
                 if (err)
@@ -268,7 +270,7 @@ describe(testSuite + testSuiteDesc,
 
     it('9. Can run custom build',
       function (done) {
-        var json = {type: 'push', globalEnv: {key: 'value'}};
+        var json = {branchName: 'master', globalEnv: {key: 'value'}};
         global.ghcAdminAdapter.triggerNewBuildByProjectId(projectId, json,
           function (err, response) {
             if (err)
