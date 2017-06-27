@@ -4,7 +4,7 @@
 var setupTests = require('../../_common/setupTests.js');
 
 var testSuite = 'ACCT-GHC-COL-ORG';
-var testSuiteDesc = ' - TestSuite for Github Org collab permissions';
+var testSuiteDesc = ' - TestSuite for Github Org admin permissions';
 
 describe(testSuite + testSuiteDesc,
   function () {
@@ -15,8 +15,8 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         setupTests().then(
           function () {
-            global.setupGithubCollabAdapter();
-            global.ghcCollabAdapter.getSubscriptions('',
+            global.setupGithubAdminAdapter();
+            global.ghcAdminAdapter.getSubscriptions('',
               function (err, response) {
                 if (err)
                   return done(new Error(
@@ -35,7 +35,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('1. Organisation member is collaborator for the subscription',
+    it('1. Organisation admin is admin for the subscription',
       function (done) {
         var currentSub =
           _.findWhere(subscriptions, {orgName: global.GITHUB_ORG_NAME});
@@ -44,7 +44,7 @@ describe(testSuite + testSuiteDesc,
 
         var query = util.format('subscriptionIds=%s', currentSub.id);
 
-        global.ghcCollabAdapter.getSubscriptionAccounts(query,
+        global.ghcAdminAdapter.getSubscriptionAccounts(query,
           function (err, subAccounts) {
             assert(!err, util.format('Unable to get subAccounts with error %s',
               err));
@@ -57,10 +57,10 @@ describe(testSuite + testSuiteDesc,
               {name: 'admin', group: 'roles'}).code;
 
             assert.isNotEmpty(_.where(subAccounts,
-              {roleCode: collabSystemCode}), 'A member of an Org is ' +
-              'not collaborator');
-            assert.isEmpty(_.where(subAccounts,
-              {roleCode: adminSystemCode}), 'A member of an Org is ' +
+              {roleCode: collabSystemCode}), 'Admin of an org is missing ' +
+              'collaborator role');
+            assert.isNotEmpty(_.where(subAccounts,
+              {roleCode: adminSystemCode}), 'Admin of an org is not' +
               'having admin role');
 
             return done();
