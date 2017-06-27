@@ -120,7 +120,7 @@ describe(testSuite + testSuiteDesc,
           ],
           function (err) {
             if (err) {
-              logger.info(bag.who, 'done async, err: ', err);
+              logger.warn(bag.who, 'done async, err: ', err);
               return done(new Error(util.format('Cannot create tag for ' +
                 'project id: %s, err: %s', projectId, err)));
             }
@@ -147,8 +147,8 @@ describe(testSuite + testSuiteDesc,
       child.on('close',
         function (code) {
           if (code > 0) {
-            logger.error(who, util.format('%s test suites failed', code));
-            return next('some tests failed');
+            logger.error(who, util.format('%s failed to create tag', code));
+            return next('failed to create tag');
           }
           return next();
         }
@@ -221,7 +221,7 @@ describe(testSuite + testSuiteDesc,
     after(
       function (done) {
         if (projectId)
-          global.ghcAdminAdapter.deleteProjectById(projectId, {},
+          global.suAdapter.deleteProjectById(projectId, {},
             function (err, response) {
               if (err) {
                 logger.warn(testSuite,
