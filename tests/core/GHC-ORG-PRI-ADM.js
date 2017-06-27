@@ -127,9 +127,7 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         var triggerBuild = new Promise(
           function (resolve, reject) {
-            var json = {
-              branchName: 'master'
-            };
+            var json = {branchName: 'master'};
             global.ghcAdminAdapter.triggerNewBuildByProjectId(projectId, json,
               function (err, response) {
                 if (err)
@@ -276,6 +274,24 @@ describe(testSuite + testSuiteDesc,
             if (err)
               return done(new Error(util.format('Cannot trigger custom build ' +
                 'for project id: %s, err: %s, %s', projectId, err, response)));
+            return done();
+          }
+        );
+      }
+    );
+
+    it('13. Can rerun build',
+      function (done) {
+        var json = {runId: runId};
+        global.ghcAdminAdapter.triggerNewBuildByProjectId(projectId, json,
+          function (err, response) {
+            if (err)
+              return done(
+                new Error(util.format('Admin cannot rerun a build' +
+                  'for project id: %s, body: %s err: %s, %s', projectId, json,
+                  err, util.inspect(response))
+                )
+              );
             return done();
           }
         );

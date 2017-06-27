@@ -278,6 +278,24 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
+    it('13. Can rerun build',
+      function (done) {
+        var json = {runId: runId};
+        global.ghcCollabAdapter.triggerNewBuildByProjectId(projectId, json,
+          function (err, response) {
+            if (err)
+              return done(
+                new Error(util.format('Collab cannot rerun a build' +
+                  'for project id: %s, body: %s err: %s, %s', projectId, json,
+                  err, util.inspect(response))
+                )
+              );
+            return done();
+          }
+        );
+      }
+    );
+
     it('10. Can reset cache',
       function (done) {
         var json = {
