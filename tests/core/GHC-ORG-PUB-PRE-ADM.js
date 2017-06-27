@@ -56,7 +56,7 @@ describe(testSuite + testSuiteDesc,
       logger.debug(who, 'Inside');
 
       // get public project before starting the tests
-      var query = util.format('name=%s', global.GHC_OWNER_PUBLIC_PROJ);
+      var query = util.format('name=%s', global.GHC_PUBLIC_PROJ);
       global.ghcAdminAdapter.getProjects(query,
         function (err, projects) {
           if (err || _.isEmpty(projects))
