@@ -27,12 +27,8 @@ echo "######### cloning repo #########"
 git clone git@github.com:shiptest-github-organization-1/shiptest_org_private_project_1 2>&1
 cd shiptest_org_private_project_1
 
-echo "############ Commit timestamp to file ############"
-echo "Commit" + $(date) > dummy_commit.txt
-
-echo "########### dummy commit ammend ##########"
-git add dummy_commit.txt 2>&1
-git commit --amend --no-edit 2>&1
+echo "############ create tag ############"
+git tag $(date "+date%y/%m/%d/time%H/%M/%S") 2>&1
 
 echo "########### pushing to git ##########"
-git push -f origin master 2>&1
+git push origin --tags 2>&1
