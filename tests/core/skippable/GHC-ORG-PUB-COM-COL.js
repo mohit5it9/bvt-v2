@@ -4,9 +4,9 @@ var setupTests = require('../../../_common/setupTests.js');
 var spawn = require('child_process').spawn;
 var backoff = require('backoff');
 
-var testSuite = 'GHC-ORG-PUB-COM-ADM';
+var testSuite = 'GHC-ORG-PUB-COM-COL';
 var testSuiteDesc = ' - TestSuite for Github Org, public project commit ' +
-  'build for admin';
+  'build for collab';
 
 describe(testSuite + testSuiteDesc,
   function () {
@@ -21,7 +21,7 @@ describe(testSuite + testSuiteDesc,
             var who = testSuite + '|before';
             logger.debug(who, 'Inside');
 
-            global.setupGithubAdminAdapter();
+            global.setupGithubCollabAdapter();
 
             var bag = {
               who: who
@@ -51,7 +51,7 @@ describe(testSuite + testSuiteDesc,
       logger.debug(who, 'Inside');
 
       var query = util.format('name=%s', global.GHC_PUBLIC_PROJ);
-      global.ghcAdminAdapter.getProjects(query,
+      global.ghcCollabAdapter.getProjects(query,
         function (err, projects) {
           if (err || _.isEmpty(projects))
             return next(util.format('cannot get project for ' +
@@ -71,7 +71,7 @@ describe(testSuite + testSuiteDesc,
       var json = {
         type: 'ci'
       };
-      global.ghcAdminAdapter.enableProjectById(projectId, json,
+      global.ghcCollabAdapter.enableProjectById(projectId, json,
         function (err, response) {
           if (err)
             return next(util.format('cannot enable private ' +
@@ -159,7 +159,7 @@ describe(testSuite + testSuiteDesc,
         function () {
           var query = util.format('isPullRequest=false&projectIds=%s',
             projectId);
-          global.ghcAdminAdapter.getRuns(query,
+          global.ghcCollabAdapter.getRuns(query,
             function (err, runs) {
               if (err)
                 return next(new Error(util.format('Cannot get builds for ' +
@@ -188,7 +188,7 @@ describe(testSuite + testSuiteDesc,
     }
 
     function cancelBuild(next) {
-      global.ghcAdminAdapter.cancelRunById(runId,
+      global.ghcCollabAdapter.cancelRunById(runId,
         function (err, response) {
           if (err)
             return next(new Error(util.format('Cannot cancel build id: %d ' +
