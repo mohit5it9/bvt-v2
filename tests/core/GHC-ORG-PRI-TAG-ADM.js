@@ -219,7 +219,6 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    // nothing to clean up in this case
     after(
       function (done) {
         if (projectId)
@@ -233,7 +232,6 @@ describe(testSuite + testSuiteDesc,
                 );
                 return done();
               }
-              // remove from nconf state if deletion is successful
               global.removeResource(
                 {
                   type: 'project',
