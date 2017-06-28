@@ -4,9 +4,9 @@ var setupTests = require('../../../_common/setupTests.js');
 var spawn = require('child_process').spawn;
 var backoff = require('backoff');
 
-var testSuite = 'GHC-ORG-PUB-COM-ADM';
-var testSuiteDesc = ' - TestSuite for Github Org, public project commit ' +
-  'build for admin';
+var testSuite = 'GHC-ORG-PUB-TAG-COL';
+var testSuiteDesc = ' - TestSuite for Github Org, public project tag ' +
+  'build for collab';
 
 describe(testSuite + testSuiteDesc,
   function () {
@@ -21,7 +21,7 @@ describe(testSuite + testSuiteDesc,
             var who = testSuite + '|before';
             logger.debug(who, 'Inside');
 
-            global.setupGithubAdminAdapter();
+            global.setupGithubCollabAdapter();
 
             var bag = {
               who: who
@@ -29,7 +29,8 @@ describe(testSuite + testSuiteDesc,
             async.series(
               [
                 getProject.bind(null, bag),
-                enableProject.bind(null, bag)
+                enableProject.bind(null, bag),
+                enableTagBuild.bind(null, bag)
               ],
               function (err) {
                 if (err)
@@ -51,7 +52,7 @@ describe(testSuite + testSuiteDesc,
       logger.debug(who, 'Inside');
 
       var query = util.format('name=%s', global.GHC_PUBLIC_PROJ);
-      global.ghcAdminAdapter.getProjects(query,
+      global.ghcCollabAdapter.getProjects(query,
         function (err, projects) {
           if (err || _.isEmpty(projects))
             return next(util.format('cannot get project for ' +
@@ -71,7 +72,7 @@ describe(testSuite + testSuiteDesc,
       var json = {
         type: 'ci'
       };
-      global.ghcAdminAdapter.enableProjectById(projectId, json,
+      global.ghcCollabAdapter.enableProjectById(projectId, json,
         function (err, response) {
           if (err)
             return next(util.format('cannot enable private ' +
@@ -90,18 +91,36 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    it('1. Can trigger a run through commit',
+    function enableTagBuild(bag, next) {
+      var who = bag.who + '|' + enableTagBuild.name;
+      logger.debug(who, 'Inside');
+
+      var json = {
+        propertyBag: {enableTagBuild: true}
+      };
+      global.ghcCollabAdapter.putProjectById(projectId, json,
+        function (err, response) {
+          if (err)
+            return next(util.format('cannot enable tag build for ' +
+              'project with id: %s, response: %s', projectId,
+              util.inspect(response)));
+          return next();
+        }
+      );
+    }
+
+    it('1. Can trigger a run through tag',
       function (done) {
         var bag = {who: testSuite + '|1|'};
         async.series(
           [
-            runCommitScript.bind(null, bag),
+            runTagScript.bind(null, bag),
             verifyBuild.bind(null, bag)
           ],
           function (err) {
             if (err) {
-              logger.info(bag.who, 'done async, err: ', err);
-              return done(new Error(util.format('Cannot create commit for ' +
+              logger.warn(bag.who, 'done async, err: ', err);
+              return done(new Error(util.format('Cannot create tag for ' +
                 'project id: %s, err: %s', projectId, err)));
             }
             return done();
@@ -111,14 +130,14 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    function runCommitScript(bag, next) {
-      var who = bag.who + '|' + runCommitScript.name;
+    function runTagScript(bag, next) {
+      var who = bag.who + '|' + runTagScript.name;
       logger.debug(who, 'Inside');
 
       var childEnv = global.process.env;
       childEnv.PROJ_NAME = global.GHC_PUBLIC_PROJ;
       childEnv.ORG_NAME = global.GITHUB_ORG_NAME;
-      var child = spawn('scripts/create_commit.sh', {env: childEnv});
+      var child = spawn('scripts/create_tag.sh', {env: childEnv});
 
       child.stdout.on('data',
         function (data) {
@@ -130,8 +149,8 @@ describe(testSuite + testSuiteDesc,
       child.on('close',
         function (code) {
           if (code > 0) {
-            logger.error(who, util.format('%s test suites failed', code));
-            return next('some tests failed');
+            logger.error(who, util.format('%s failed to create tag', code));
+            return next('failed to create tag');
           }
           return next();
         }
@@ -150,16 +169,16 @@ describe(testSuite + testSuiteDesc,
       expBackoff.failAfter(15); // fail after 15 attempts(30 sec)
       expBackoff.on('backoff',
         function (number, delay) {
-          logger.info('No commit build for project with id:', projectId, 'yet.',
+          logger.info('No tag build for project with id:', projectId, 'yet.',
             'Retrying after ', delay, ' ms');
         }
       );
 
       expBackoff.on('ready',
         function () {
-          var query = util.format('isPullRequest=false&projectIds=%s',
+          var query = util.format('isGitTag=true&projectIds=%s',
             projectId);
-          global.ghcAdminAdapter.getRuns(query,
+          global.ghcCollabAdapter.getRuns(query,
             function (err, runs) {
               if (err)
                 return next(new Error(util.format('Cannot get builds for ' +
@@ -188,7 +207,7 @@ describe(testSuite + testSuiteDesc,
     }
 
     function cancelBuild(next) {
-      global.ghcAdminAdapter.cancelRunById(runId,
+      global.ghcCollabAdapter.cancelRunById(runId,
         function (err, response) {
           if (err)
             return next(new Error(util.format('Cannot cancel build id: %d ' +
