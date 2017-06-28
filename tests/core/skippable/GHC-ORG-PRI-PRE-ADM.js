@@ -266,7 +266,9 @@ describe(testSuite + testSuiteDesc,
                 return done();
               }
             }
-        );
+          );
+        else
+          return done();
       }
     );
   }
