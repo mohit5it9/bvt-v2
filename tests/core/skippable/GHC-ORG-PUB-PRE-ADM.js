@@ -1,7 +1,7 @@
 'use strict';
 
-var setupTests = require('../../../../_common/setupTests.js');
-var GithubAdapter = require('../../../../_common/github/Adapter.js');
+var setupTests = require('../../../_common/setupTests.js');
+var GithubAdapter = require('../../../_common/github/Adapter.js');
 var backoff = require('backoff');
 
 var testSuite = 'GHC-ORG-PUB-PRE-ADM';
