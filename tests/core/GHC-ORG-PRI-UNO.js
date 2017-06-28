@@ -91,7 +91,7 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    it('13. CANNOT Enable a public project',
+    it('1. CANNOT Enable a public project',
       function (done) {
         var json = {
           type: 'ci'
@@ -106,7 +106,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('14. Can Synchonize a public project',
+    it('2. Can Synchonize a public project',
       function (done) {
         var json = {type: 'ci'};
         global.ghcAdminAdapter.enableProjectById(projectId, json,
@@ -114,14 +114,22 @@ describe(testSuite + testSuiteDesc,
             assert(!err, util.format('admin should be able to enable the ' +
               'project got err: %s, %s', err, response));
 
-            global.ghcMemberAdapter.syncProjectById(projectId,
-              function (e, project) {
-                assert(!e, util.format('Failed to sync project' +
-                    '%s with error: %s, project: %s', projectId, e, project));
-                assert.isNotEmpty(project, 'Project should not be empty');
-                assert.isNotEmpty(project.branches,
-                  'Project should have branches');
-                return done();
+            global.saveResource(
+              {
+                type: 'project',
+                id: projectId
+              },
+              function () {
+                global.ghcMemberAdapter.syncProjectById(projectId,
+                  function (e, project) {
+                    assert(!e, util.format('Failed to sync project' +
+                      '%s with error: %s, project: %s', projectId, e, project));
+                    assert.isNotEmpty(project, 'Project should not be empty');
+                    assert.isNotEmpty(project.branches,
+                      'Project should have branches');
+                    return done();
+                  }
+                );
               }
             );
           }
@@ -129,7 +137,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('15. CANNOT pause a public project',
+    it('3. CANNOT pause a public project',
       function (done) {
         var json = {propertyBag: {isPaused: true}};
         global.ghcMemberAdapter.putProjectById(projectId, json,
@@ -142,7 +150,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('16. CANNOT resume a public project',
+    it('4. CANNOT resume a public project',
       function (done) {
         // first enable using su adapter
         var json = {propertyBag: {isPaused: true}};
@@ -166,7 +174,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('17. CANNOT trigger manual builds',
+    it('5. CANNOT trigger manual builds',
       function (done) {
         var json = {branchName: 'master'};
         global.ghcMemberAdapter.triggerNewBuildByProjectId(projectId, json,
@@ -245,7 +253,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('18. Can view builds for public project',
+    it('6. Can view builds for public project',
       function (done) {
         var query = util.format('projectIds=%s', projectId);
         global.ghcMemberAdapter.getRuns(query,
@@ -261,7 +269,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('19. Can view consoles',
+    it('7. Can view consoles',
       function (done) {
         var bag = {
           runId: runId,
@@ -304,7 +312,7 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    it('10. CANNOT cancel builds for public project',
+    it('8. CANNOT cancel builds for public project',
       function (done) {
         global.ghcMemberAdapter.cancelRunById(runId,
           function (err, response) {
@@ -317,7 +325,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('21. CANNOT run custom build',
+    it('9. CANNOT run custom build',
       function (done) {
         var json = {branchName: 'master', globalEnv: {key: 'value'}};
         global.ghcMemberAdapter.triggerNewBuildByProjectId(projectId, json,
@@ -331,7 +339,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('22. CANNOT reset cache',
+    it('10. CANNOT reset cache',
       function (done) {
         var json = {
           propertyBag: {
@@ -350,7 +358,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('23. CANNOT Reset a public project',
+    it('11. CANNOT Reset a public project',
       function (done) {
         var json = {projectId: projectId};
         global.ghcMemberAdapter.resetProjectById(projectId, json,
@@ -364,7 +372,7 @@ describe(testSuite + testSuiteDesc,
       }
     );
 
-    it('24. CANNOT Delete a public project',
+    it('12. CANNOT Delete a public project',
       function (done) {
         var json = {projectId: projectId};
         global.ghcMemberAdapter.deleteProjectById(projectId, json,
@@ -389,18 +397,17 @@ describe(testSuite + testSuiteDesc,
                     '%s, err: %s, %s', projectId, err, util.inspect(response)
                   )
                 );
-                global.saveResource(
-                  {
-                    type: 'project',
-                    id: projectId
-                  },
+                return done();
+              }
+              global.removeResource(
+                {
+                  type: 'project',
+                  id: projectId
+                },
                 function () {
                   return done();
                 }
               );
-              } else {
-                return done();
-              }
             }
         );
       }

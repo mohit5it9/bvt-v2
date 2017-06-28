@@ -48,8 +48,15 @@ describe(testSuite + testSuiteDesc,
             if (err)
               return done(new Error(util.format('cannot enable public ' +
                 'project with id:%s', projectId)));
-
-            return done();
+            global.saveResource(
+              {
+                type: 'project',
+                id: projectId
+              },
+              function () {
+                return done();
+              }
+            );
           }
         );
       }
@@ -340,7 +347,16 @@ describe(testSuite + testSuiteDesc,
             if (err)
               return done(new Error(util.format('Cannot delete project id: %s' +
                 ', err: %s, %s', projectId, err, response)));
-            return done();
+            global.removeResource(
+              {
+                type: 'project',
+                id: projectId
+              },
+              function () {
+                projectId = null;
+                return done();
+              }
+            );
           }
         );
       }
@@ -357,18 +373,17 @@ describe(testSuite + testSuiteDesc,
                     '%s, err: %s, %s', projectId, err, util.inspect(response)
                   )
                 );
-                global.saveResource(
-                  {
-                    type: 'project',
-                    id: projectId
-                  },
+                return done();
+              }
+              global.removeResource(
+                {
+                  type: 'project',
+                  id: projectId
+                },
                 function () {
                   return done();
                 }
               );
-              } else {
-                return done();
-              }
             }
         );
       }
