@@ -4,9 +4,9 @@ var setupTests = require('../../_common/setupTests.js');
 var GithubAdapter = require('../../_common/github/Adapter.js');
 var backoff = require('backoff');
 
-var testSuite = 'GHC-ORG-PUB-PRE-ADM';
+var testSuite = 'GHC-ORG-PUB-PRE-COL';
 var testSuiteDesc = ' - TestSuite for Github Org, pull request of public ' +
-  'project for Admin';
+  'project for Collab';
 
 describe(testSuite + testSuiteDesc,
   function () {
@@ -21,9 +21,9 @@ describe(testSuite + testSuiteDesc,
       function (done) {
         setupTests().then(
           function () {
-            githubAdapter = new GithubAdapter(global.githubOwnerAccessToken,
+            githubAdapter = new GithubAdapter(global.githubCollabAccessToken,
               global.GHC_ENDPOINT);
-            global.setupGithubAdminAdapter();
+            global.setupGithubCollabAdapter();
 
             var bag = {
               who: util.format('%s|before', testSuite)
@@ -55,16 +55,16 @@ describe(testSuite + testSuiteDesc,
       var who = bag.who + '|' + getProject.name;
       logger.debug(who, 'Inside');
 
-      // get public project before starting the tests
       var query = util.format('name=%s', global.GHC_PUBLIC_PROJ);
-      global.ghcAdminAdapter.getProjects(query,
+      global.ghcCollabAdapter.getProjects(query,
         function (err, projects) {
           if (err || _.isEmpty(projects))
             return next(new Error(util.format('cannot get project for ' +
-              'query: %s, Err: %s', query, err)));
+              'query: %s, Err: %s, %s', query, err, util.inspect(projects))));
           var project = _.first(projects);
           projectId = project.id;
           projectFullName = project.fullName;
+
           return next();
         }
       );
@@ -77,7 +77,7 @@ describe(testSuite + testSuiteDesc,
       var json = {
         type: 'ci'
       };
-      global.ghcAdminAdapter.enableProjectById(projectId, json,
+      global.ghcCollabAdapter.enableProjectById(projectId, json,
         function (err) {
           if (err)
             return next(new Error(util.format('cannot enable public ' +
@@ -193,11 +193,12 @@ describe(testSuite + testSuiteDesc,
           function () {
             var query = util.format('isPullRequest=true&projectIds=%s',
               projectId);
-            global.ghcAdminAdapter.getRuns(query,
+            global.ghcCollabAdapter.getRuns(query,
               function (err, runs) {
                 if (err)
                   return done(new Error(util.format('Cannot get builds for ' +
-                    'project id: %s, err: %s', projectId, err)));
+                    'project id: %s, err: %s, %s', projectId, err,
+                    util.inspect(runs))));
                 if (_.isEmpty(runs)) {
                   expBackoff.backoff();
                 } else {
@@ -222,12 +223,12 @@ describe(testSuite + testSuiteDesc,
     );
 
     function cancelBuild(done) {
-      global.ghcAdminAdapter.cancelRunById(runId,
+      global.ghcCollabAdapter.cancelRunById(runId,
         function (err, response) {
           if (err)
             return done(new Error(util.format('Cannot cancel build id: %d ' +
               'for project id: %s, err: %s, %s', runId, projectId, err,
-              util.inspect(response))));
+              response)));
           logger.info('Cancelled build');
           return done();
         }
@@ -262,3 +263,4 @@ describe(testSuite + testSuiteDesc,
     );
   }
 );
+
