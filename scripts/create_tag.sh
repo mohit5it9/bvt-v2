@@ -22,8 +22,8 @@ add_ssh_key() {
 }
 
 echo "############ setup git config ###############"
-git config --global user.email "shiptestowner@gmail.com"
-git config --global user.name "shiptest-github-owner"
+git config --global user.email "shiptestowner@gmail.com" 2>&1
+git config --global user.name "shiptest-github-owner" 2>&1
 
 add_ssh_key
 
