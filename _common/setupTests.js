@@ -49,6 +49,8 @@ function setupTests() {
 
       global.GHC_PUBLIC_PROJ = 'shiptest_org_public_project_1';
 
+      global.DELETE_PROJ_DELAY = 30;
+
       var bag = {
         systemCodes: null
       };
