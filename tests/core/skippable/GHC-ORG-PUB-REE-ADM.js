@@ -4,8 +4,8 @@ var setupTests = require('../../../_common/setupTests.js');
 var GithubAdapter = require('../../../_common/github/Adapter.js');
 var backoff = require('backoff');
 
-var testSuite = 'GHC-ORG-PRI-REE-ADM';
-var testSuiteDesc = ' - TestSuite for Github Org, private project release ' +
+var testSuite = 'GHC-ORG-PUB-REE-ADM';
+var testSuiteDesc = ' - TestSuite for Github Org, public project release ' +
   'build for admin';
 
 describe(testSuite + testSuiteDesc,
@@ -217,28 +217,35 @@ describe(testSuite + testSuiteDesc,
 
     after(
       function (done) {
-        if (projectId)
-          global.suAdapter.deleteProjectById(projectId, {},
-            function (err, response) {
-              if (err) {
-                logger.warn(testSuite,
-                  util.format('Cleanup-failed to delete ' +
-                  'the project id: %s, err: %s, response: %s', projectId, err,
-                  util.inspect(response))
-                );
-                return done();
-              }
-              global.removeResource(
-                {
-                  type: 'project',
-                  id: projectId
-                },
-                function () {
-                  return done();
+        if (projectId) {
+          logger.info('Sleeping for 15sec as cancelled builds can post ' +
+            'consoles till 2min');
+          setTimeout(
+            function () {
+              global.suAdapter.deleteProjectById(projectId, {},
+                function (err, response) {
+                  if (err) {
+                    logger.warn(testSuite,
+                      util.format('Cleanup-failed to delete ' +
+                      'the project id: %s, err: %s, response: %s', projectId,
+                      err, util.inspect(response))
+                    );
+                    return done();
+                  }
+                  global.removeResource(
+                    {
+                      type: 'project',
+                      id: projectId
+                    },
+                    function () {
+                      return done();
+                    }
+                  );
                 }
               );
-            }
+            }, global.DELETE_PROJ_DELAY
           );
+        }
       }
     );
   }
