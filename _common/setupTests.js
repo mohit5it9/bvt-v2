@@ -43,10 +43,7 @@ function setupTests() {
         'shiptest-github-owner/testprivate';
       // TODO: use full names everywhere for querying projects
       global.GHC_MEMBER_PRIVATE_PROJ = 'testprivate';
-      global.GHC_COLLAB_PRIVATE_PROJ = 'shiptest_org_private_project_1';
-      global.GHC_OWNER_PRIVATE_PROJ = 'shiptest_org_private_project_1';
       global.GHC_PRIVATE_PROJ = 'shiptest_org_private_project_1';
-
       global.GHC_PUBLIC_PROJ = 'shiptest_org_public_project_1';
 
       global.DELETE_PROJ_DELAY = 30;

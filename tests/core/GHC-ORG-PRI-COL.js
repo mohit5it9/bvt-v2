@@ -18,7 +18,7 @@ describe(testSuite + testSuiteDesc,
           function () {
             global.setupGithubCollabAdapter();
             // get private project before starting the tests
-            var query = util.format('name=%s', global.GHC_COLLAB_PRIVATE_PROJ);
+            var query = util.format('name=%s', global.GHC_PRIVATE_PROJ);
             global.ghcCollabAdapter.getProjects(query,
               function (err, projects) {
                 if (err || _.isEmpty(projects))
