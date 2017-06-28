@@ -51,7 +51,7 @@ describe(testSuite + testSuiteDesc,
       var who = bag.who + '|' + getProject.name;
       logger.debug(who, 'Inside');
 
-      var query = util.format('name=%s', global.GHC_OWNER_PRIVATE_PROJ);
+      var query = util.format('name=%s', global.GHC_PRIVATE_PROJ);
       global.ghcAdminAdapter.getProjects(query,
         function (err, projects) {
           if (err || _.isEmpty(projects))
@@ -135,7 +135,7 @@ describe(testSuite + testSuiteDesc,
       logger.debug(who, 'Inside');
 
       var childEnv = global.process.env;
-      childEnv.PROJ_NAME = global.GHC_OWNER_PRIVATE_PROJ;
+      childEnv.PROJ_NAME = global.GHC_PRIVATE_PROJ;
       childEnv.ORG_NAME = global.GITHUB_ORG_NAME;
       var child = spawn('scripts/create_tag.sh', {env: childEnv});
 

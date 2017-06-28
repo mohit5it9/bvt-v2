@@ -56,7 +56,7 @@ describe(testSuite + testSuiteDesc,
       logger.debug(who, 'Inside');
 
       // get private project before starting the tests
-      var query = util.format('name=%s', global.GHC_OWNER_PRIVATE_PROJ);
+      var query = util.format('name=%s', global.GHC_PRIVATE_PROJ);
       global.ghcAdminAdapter.getProjects(query,
         function (err, projects) {
           if (err || _.isEmpty(projects))
