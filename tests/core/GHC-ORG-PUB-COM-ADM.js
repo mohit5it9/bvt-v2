@@ -50,7 +50,6 @@ describe(testSuite + testSuiteDesc,
       var who = bag.who + '|' + getProject.name;
       logger.debug(who, 'Inside');
 
-      // get public project before starting the tests
       var query = util.format('name=%s', global.GHC_PUBLIC_PROJ);
       global.ghcAdminAdapter.getProjects(query,
         function (err, projects) {
@@ -118,6 +117,7 @@ describe(testSuite + testSuiteDesc,
 
       var childEnv = global.process.env;
       childEnv.PROJ_NAME = global.GHC_PUBLIC_PROJ;
+      childEnv.ORG_NAME = global.GITHUB_ORG_NAME;
       var child = spawn('scripts/create_commit.sh', {env: childEnv});
 
       child.stdout.on('data',
