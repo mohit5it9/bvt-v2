@@ -4,8 +4,8 @@ var setupTests = require('../../_common/setupTests.js');
 var spawn = require('child_process').spawn;
 var backoff = require('backoff');
 
-var testSuite = 'GHC-ORG-PRI-COM-ADM';
-var testSuiteDesc = ' - TestSuite for Github Org, private project commit ' +
+var testSuite = 'GHC-ORG-PUB-COM-ADM';
+var testSuiteDesc = ' - TestSuite for Github Org, public project commit ' +
   'build for admin';
 
 describe(testSuite + testSuiteDesc,
@@ -50,8 +50,8 @@ describe(testSuite + testSuiteDesc,
       var who = bag.who + '|' + getProject.name;
       logger.debug(who, 'Inside');
 
-      // get private project before starting the tests
-      var query = util.format('name=%s', global.GHC_OWNER_PRIVATE_PROJ);
+      // get public project before starting the tests
+      var query = util.format('name=%s', global.GHC_PUBLIC_PROJ);
       global.ghcAdminAdapter.getProjects(query,
         function (err, projects) {
           if (err || _.isEmpty(projects))
@@ -117,7 +117,7 @@ describe(testSuite + testSuiteDesc,
       logger.debug(who, 'Inside');
 
       var childEnv = global.process.env;
-      childEnv.PROJ_NAME = global.GHC_OWNER_PRIVATE_PROJ;
+      childEnv.PROJ_NAME = global.GHC_PUBLIC_PROJ;
       var child = spawn('scripts/create_commit.sh', {env: childEnv});
 
       child.stdout.on('data',
@@ -200,7 +200,6 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    // nothing to clean up in this case
     after(
       function (done) {
         if (projectId)

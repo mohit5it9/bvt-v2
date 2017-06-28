@@ -5,6 +5,11 @@ export RES_GH_SSH="bvt_v2_ghc_owner_ssh_key"
 export RES_GH_SSH_UP=$(echo $RES_GH_SSH | awk '{print toupper($0)}')
 export RES_GH_SSH_META=$(eval echo "$"$RES_GH_SSH_UP"_META")
 
+if [ -z $PROJ_NAME ]; then
+  echo 'project to create commit not set! Make sure env $PROJ_NAME is set'
+  exit 1
+fi
+
 add_ssh_key() {
  pushd "$RES_GH_SSH_META"
  echo "Extracting ssh key"
@@ -18,13 +23,13 @@ add_ssh_key() {
 }
 
 echo "############ setup git config ###############"
-git config --global user.email "shiptestowner@gmail.com"
-git config --global user.name "shiptest-github-owner"
+git config --global user.email "shiptestowner@gmail.com" 2>&1
+git config --global user.name "shiptest-github-owner" 2>&1
 
 add_ssh_key
 
 echo "######### cloning repo #########"
-git clone git@github.com:shiptest-github-organization-1/shiptest_org_private_project_1 2>&1
+git clone git@github.com:shiptest-github-organization-1/$PROJ_NAME 2>&1
 cd shiptest_org_private_project_1
 
 echo "############ Commit timestamp to file ############"
