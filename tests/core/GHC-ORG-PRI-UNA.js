@@ -64,11 +64,19 @@ describe(testSuite + testSuiteDesc,
           function (err) {
             assert(!err, 'admin should be able to enable the project');
 
-            global.pubAdapter.syncProjectById(projectId,
-              function (e) {
-                assert.strictEqual(e, 404,
-                  'public user should not be able to sync a project');
-                return done();
+            global.saveResource(
+              {
+                type: 'project',
+                id: projectId
+              },
+              function () {
+                global.pubAdapter.syncProjectById(projectId,
+                  function (e) {
+                    assert.strictEqual(e, 404,
+                      'public user should not be able to sync a project');
+                    return done();
+                  }
+                );
               }
             );
           }
@@ -338,18 +346,17 @@ describe(testSuite + testSuiteDesc,
                     '%s, err: %s, %s', projectId, err, util.inspect(response)
                   )
                 );
-                global.saveResource(
-                  {
-                    type: 'project',
-                    id: projectId
-                  },
+                return done();
+              }
+              global.removeResource(
+                {
+                  type: 'project',
+                  id: projectId
+                },
                 function () {
                   return done();
                 }
               );
-              } else {
-                return done();
-              }
             }
         );
       }

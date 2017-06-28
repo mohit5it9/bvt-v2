@@ -49,7 +49,15 @@ describe(testSuite + testSuiteDesc,
               return done(new Error(util.format('cannot enable private ' +
                 'project with id:%s', projectId)));
 
-            return done();
+            global.saveResource(
+              {
+                type: 'project',
+                id: projectId
+              },
+              function () {
+                return done();
+              }
+            );
           }
         );
       }
@@ -353,18 +361,17 @@ describe(testSuite + testSuiteDesc,
                     '%s, err: %s, %s', projectId, err, util.inspect(response)
                   )
                 );
-                global.saveResource(
-                  {
-                    type: 'project',
-                    id: projectId
-                  },
+                return done();
+              }
+              global.removeResource(
+                {
+                  type: 'project',
+                  id: projectId
+                },
                 function () {
                   return done();
                 }
               );
-              } else {
-                return done();
-              }
             }
         );
       }

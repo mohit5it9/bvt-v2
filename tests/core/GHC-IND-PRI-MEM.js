@@ -108,15 +108,25 @@ describe(testSuite + testSuiteDesc,
           function (err) {
             assert(!err, util.format('admin should be able to enable the ' +
               'project got err: %s', err));
+            global.saveResource(
+              {
+                type: 'project',
+                id: projectId
+              },
+              function () {
+                global.ghcMemberAdapter.syncProjectById(projectId,
+                  function (e, project) {
+                    assert(!err, util.format('Failed to sync project' +
+                      '%s with error: %s, project: %s', projectId, err,
+                      project));
 
-            global.ghcMemberAdapter.syncProjectById(projectId,
-              function (e, project) {
-                assert(!err, util.format('Failed to sync project' +
-                    '%s with error: %s, project: %s', projectId, err, project));
-                assert.isNotEmpty(project, 'Project should not be empty');
-                assert.isNotEmpty(project.branches,
-                  'Project should have branches');
-                return done();
+                    assert.isNotEmpty(project, 'Project should not be empty');
+                    assert.isNotEmpty(project.branches,
+                      'Project should have branches');
+
+                    return done();
+                  }
+                );
               }
             );
           }
@@ -380,18 +390,17 @@ describe(testSuite + testSuiteDesc,
                     '%s, err: %s, %s', projectId, err, util.inspect(response)
                   )
                 );
-                global.saveResource(
-                  {
-                    type: 'project',
-                    id: projectId
-                  },
+                return done();
+              }
+              global.removeResource(
+                {
+                  type: 'project',
+                  id: projectId
+                },
                 function () {
                   return done();
                 }
               );
-              } else {
-                return done();
-              }
             }
         );
       }
