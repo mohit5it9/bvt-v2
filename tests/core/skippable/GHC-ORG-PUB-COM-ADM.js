@@ -1,6 +1,6 @@
 'use strict';
 
-var setupTests = require('../../_common/setupTests.js');
+var setupTests = require('../../../_common/setupTests.js');
 var spawn = require('child_process').spawn;
 var backoff = require('backoff');
 
