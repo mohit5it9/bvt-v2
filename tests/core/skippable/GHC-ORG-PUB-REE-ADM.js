@@ -245,6 +245,8 @@ describe(testSuite + testSuiteDesc,
               );
             }, global.DELETE_PROJ_DELAY
           );
+        } else {
+          return done();
         }
       }
     );

@@ -224,6 +224,8 @@ describe(testSuite + testSuiteDesc,
               );
             }
           );
+        else
+          return done();
       }
     );
   }
