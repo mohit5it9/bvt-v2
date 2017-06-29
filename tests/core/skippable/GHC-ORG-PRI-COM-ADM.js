@@ -90,9 +90,33 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    it('1. Can trigger a run through commit',
+    it('1. Can trigger a run through commit to master branch',
       function (done) {
         var bag = {who: testSuite + '|1|'};
+        async.series(
+          [
+            runCommitScript.bind(null, bag),
+            verifyBuild.bind(null, bag)
+          ],
+          function (err) {
+            if (err) {
+              logger.info(bag.who, 'done async, err: ', err);
+              return done(new Error(util.format('Cannot create commit for ' +
+                'project id: %s, err: %s', projectId, err)));
+            }
+            return done();
+          }
+
+        );
+      }
+    );
+
+    it('2. Can trigger a run through commit to non-master branch',
+      function (done) {
+        var bag = {
+          who: testSuite + '|2|',
+          branchName: 'branch_1'
+        };
         async.series(
           [
             runCommitScript.bind(null, bag),
@@ -118,6 +142,10 @@ describe(testSuite + testSuiteDesc,
       var childEnv = global.process.env;
       childEnv.PROJ_NAME = global.GHC_PRIVATE_PROJ;
       childEnv.ORG_NAME = global.GITHUB_ORG_NAME;
+
+      if (bag.branchName)
+        childEnv.BRANCH_NAME = bag.branchName;
+
       var child = spawn('scripts/create_commit.sh', {env: childEnv});
 
       child.stdout.on('data',
@@ -159,6 +187,10 @@ describe(testSuite + testSuiteDesc,
         function () {
           var query = util.format('isPullRequest=false&projectIds=%s',
             projectId);
+          if (bag.branchName)
+            query = util.format('isPullRequest=false&projectIds=%s&branch=%s',
+            projectId, bag.branchName);
+
           global.ghcAdminAdapter.getRuns(query,
             function (err, runs) {
               if (err)
