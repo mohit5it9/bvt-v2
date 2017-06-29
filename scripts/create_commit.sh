@@ -37,6 +37,13 @@ echo "######### cloning repo #########"
 git clone git@github.com:$ORG_NAME/$PROJ_NAME 2>&1
 cd $PROJ_NAME
 
+if [ -z $BRANCH_NAME ]; then
+  echo 'using default branch master'
+  BRANCH_NAME='master'
+fi
+
+git checkout -b $BRANCH_NAME 2>&1
+
 echo "############ Commit timestamp to file ############"
 echo "Commit" + $(date) > dummy_commit.txt
 
@@ -44,12 +51,8 @@ echo "########### dummy commit ammend ##########"
 git add dummy_commit.txt 2>&1
 git commit --amend --no-edit 2>&1
 
-if [ -z $BRANCH_NAME ]; then
-  echo 'using default branch master'
-  BRANCH_NAME = 'master'
-fi
 
 echo "########### pushing to branch: $BRANCH_NAME ##########"
 git push -f origin $BRANCH_NAME 2>&1
 
-rm -rf $PROJ_NAME
+rm -rf $PROJ_NAME 2>&1
