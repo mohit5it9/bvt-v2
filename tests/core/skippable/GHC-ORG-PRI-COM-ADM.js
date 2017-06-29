@@ -143,7 +143,7 @@ describe(testSuite + testSuiteDesc,
       childEnv.PROJ_NAME = global.GHC_PRIVATE_PROJ;
       childEnv.ORG_NAME = global.GITHUB_ORG_NAME;
 
-      if (bag.branch)
+      if (bag.branchName)
         childEnv.BRANCH_NAME = bag.branchName;
 
       var child = spawn('scripts/create_commit.sh', {env: childEnv});
@@ -187,6 +187,10 @@ describe(testSuite + testSuiteDesc,
         function () {
           var query = util.format('isPullRequest=false&projectIds=%s',
             projectId);
+          if (bag.branchName)
+            query = util.format('isPullRequest=false&projectIds=%s&branch=%s',
+            projectId, bag.branchName);
+
           global.ghcAdminAdapter.getRuns(query,
             function (err, runs) {
               if (err)
