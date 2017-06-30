@@ -267,7 +267,14 @@ describe(testSuite + testSuiteDesc,
               return done(new Error(util.format('Cannot cancel build id: %d ' +
                 'for project id: %s, err: %s, %s', runId, projectId, err,
                 response)));
-            return done();
+
+            setTimeout(
+              function () {
+                logger.info(util.format('sleeping %s seconds after cancel',
+                  global.DELETE_PROJ_DELAY));
+                return done();
+              }, global.DELETE_PROJ_DELAY
+            );
           }
         );
       }
