@@ -48,6 +48,7 @@ function setupTests() {
 
       global.DELETE_PROJ_DELAY = 20;
       global.GHC_CORE_TEST_U14_PROJ = 'coretest_single_build_nod';
+      global.GHC_CORE_TEST_U16_PROJ = 'coretest_single_build_nod_16';
 
       var bag = {
         systemCodes: null
