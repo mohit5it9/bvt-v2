@@ -44,7 +44,7 @@ describe(testSuite + testSuiteDesc,
       var who = bag.who + '|' + getProject.name;
       logger.debug(who, 'Inside');
 
-      var query = util.format('name=%s', global.GHC_CORE_TEST_U14_PROJ);
+      var query = util.format('name=%s', global.GHC_CORE_TEST_U16_PROJ);
       global.ghcAdminAdapter.getProjects(query,
         function (err, projects) {
           if (err || _.isEmpty(projects))
@@ -85,7 +85,7 @@ describe(testSuite + testSuiteDesc,
       );
     }
 
-    it('16. Run a build for test common services and env vars',
+    it('17. Run a build for test common services and env vars',
       function (done) {
         var triggerBuild = new Promise(
           function (resolve, reject) {
