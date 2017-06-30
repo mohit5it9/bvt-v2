@@ -364,7 +364,14 @@ describe(testSuite + testSuiteDesc,
             assert(!err, util.format('cancel build failed for build with ' +
               'id: %s err: %s, %s', buildId, err, util.inspect(response)));
             buildId = null;
-            return done();
+
+            setTimeout(
+              function () {
+                logger.info(who, util.format('sleeping %s seconds after cancel',
+                  global.DELETE_PROJ_DELAY));
+                return done();
+              }, global.DELETE_PROJ_DELAY
+            );
           }
         );
       }

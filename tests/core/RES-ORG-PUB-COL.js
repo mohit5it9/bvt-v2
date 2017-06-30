@@ -372,7 +372,6 @@ describe(testSuite + testSuiteDesc,
                 return done();
               }, global.DELETE_PROJ_DELAY
             );
-            return done();
           }
         );
       }
