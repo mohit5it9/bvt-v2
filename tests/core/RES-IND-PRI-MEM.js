@@ -404,10 +404,10 @@ describe(testSuite + testSuiteDesc,
                   'id: %s err: %s, %s', buildId, err, util.inspect(response)));
                 buildId = null;
 
+                logger.info(util.format('sleeping %s ms after cancel',
+                  global.DELETE_PROJ_DELAY));
                 setTimeout(
                   function () {
-                    logger.info(util.format('sleeping %s seconds after cancel',
-                      global.DELETE_PROJ_DELAY));
                     return done();
                   }, global.DELETE_PROJ_DELAY
                 );
@@ -564,10 +564,10 @@ describe(testSuite + testSuiteDesc,
             return next();
           }
 
+          logger.info(who, util.format('sleeping %s ms after cancel',
+            global.DELETE_PROJ_DELAY));
           setTimeout(
             function () {
-              logger.info(who, util.format('sleeping %s seconds after cancel',
-                global.DELETE_PROJ_DELAY));
               return next();
             }, global.DELETE_PROJ_DELAY
           );
