@@ -367,7 +367,7 @@ describe(testSuite + testSuiteDesc,
 
             setTimeout(
               function () {
-                logger.info(who, util.format('sleeping %s seconds after cancel',
+                logger.info(util.format('sleeping %s seconds after cancel',
                   global.DELETE_PROJ_DELAY));
                 return done();
               }, global.DELETE_PROJ_DELAY
