@@ -3,8 +3,9 @@
 var setupTests = require('../../../_common/setupTests.js');
 var backoff = require('backoff');
 
-var testSuite = 'GHC-ORG-PRI-ADM';
-var testSuiteDesc = ' - TestSuite for Github Org, private project for Admin';
+var testSuite = 'RunCI';
+var testSuiteDesc = ' - TestSuite for checking services and environment ' +
+  'variables ';
 
 describe(testSuite + testSuiteDesc,
   function () {
