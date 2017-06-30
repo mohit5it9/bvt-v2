@@ -210,7 +210,13 @@ describe(testSuite + testSuiteDesc,
               'for project id: %s, err: %s, %s', runId, projectId, err,
               util.inspect(response))));
           logger.info('Cancelled build');
-          return next();
+          setTimeout(
+            function () {
+              logger.info(util.format('sleeping %s seconds after cancel',
+                global.DELETE_PROJ_DELAY));
+              return next();
+            }, global.DELETE_PROJ_DELAY
+          );
         }
       );
     }
