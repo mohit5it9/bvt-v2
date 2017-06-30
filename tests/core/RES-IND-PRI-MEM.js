@@ -551,10 +551,19 @@ describe(testSuite + testSuiteDesc,
 
       global.suAdapter.putBuildById(buildId, json,
         function (err, response) {
-          if (err)
+          if (err) {
             logger.warn(util.format('admin failed to cancel build with ' +
               'id: %s err: %s, %s', buildId, err, util.inspect(response)));
-          return next();
+            return next();
+          }
+
+          setTimeout(
+            function () {
+              logger.info(who, util.format('sleeping %s seconds after cancel',
+                global.DELETE_PROJ_DELAY));
+              return next();
+            }, global.DELETE_PROJ_DELAY
+          );
         }
       );
     }
