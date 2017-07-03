@@ -210,50 +210,17 @@ describe(testSuite + testSuiteDesc,
               'for project id: %s, err: %s, %s', runId, projectId, err,
               util.inspect(response))));
           logger.info('Cancelled build');
-          logger.info(util.format('sleeping %s ms after cancel',
-            global.DELETE_PROJ_DELAY));
-          setTimeout(
-            function () {
-              return next();
-            }, global.DELETE_PROJ_DELAY
-          );
+          return next();
         }
       );
     }
 
     after(
       function (done) {
-        if (projectId) {
-          logger.info('Sleeping for 15sec as cancelled builds can post ' +
-            'consoles till 2min');
-          setTimeout(
-            function () {
-              global.suAdapter.deleteProjectById(projectId, {},
-                function (err, response) {
-                  if (err) {
-                    logger.warn(testSuite,
-                      util.format('Cleanup-failed to delete ' +
-                      'the project id: %s, err: %s, response: %s', projectId,
-                      err, util.inspect(response))
-                    );
-                    return done();
-                  }
-                  global.removeResource(
-                    {
-                      type: 'project',
-                      id: projectId
-                    },
-                    function () {
-                      return done();
-                    }
-                  );
-                }
-              );
-            }, global.DELETE_PROJ_DELAY
-          );
-        } else {
+        if (projectId)
+          global.deleteProjectWithBackoff(projectId, done);
+        else
           return done();
-        }
       }
     );
   }

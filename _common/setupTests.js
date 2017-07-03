@@ -5,6 +5,7 @@ module.exports = self;
 
 var chai = require('chai');
 var fs = require('fs');
+var backoff = require('backoff');
 global.assert = chai.assert;
 global.expect = require('chai').expect;
 global.util = require('util');
@@ -46,7 +47,7 @@ function setupTests() {
       global.GHC_PRIVATE_PROJ = 'shiptest_org_private_project_1';
       global.GHC_PUBLIC_PROJ = 'shiptest_org_public_project_1';
 
-      global.DELETE_PROJ_DELAY = 25000;
+      global.DELETE_PROJ_DELAY = 5000;
       global.GHC_CORE_TEST_U14_PROJ = 'coretest_single_build_nod';
       global.GHC_CORE_TEST_U16_PROJ = 'coretest_single_build_nod_16';
 
@@ -210,4 +211,54 @@ global.clearResources = function () {
       }
     }
   );
+};
+
+global.deleteProjectWithBackoff = function (projectId, done) {
+  var expBackoff = backoff.exponential({
+    initialDelay: 1000,
+    maxDelay: global.DELETE_PROJ_DELAY
+  });
+  expBackoff.failAfter(30); // fail after 30 attempts
+  expBackoff.on('backoff',
+    function (number, delay) {
+      logger.info('Failed to delete project with id:', projectId,
+        'Retrying after ', delay, ' ms');
+    }
+  );
+
+  expBackoff.on('ready',
+    function () {
+      global.suAdapter.deleteProjectById(projectId, {},
+        function (err, response) {
+          if (err) {
+            logger.warn('deleteProjectWithBackoff',
+              util.format('Cleanup-failed to delete the project with id:' +
+                '%s, err: %s, %s', projectId, err, util.inspect(response)
+              )
+            );
+            return expBackoff.backoff();
+          }
+          global.removeResource(
+            {
+              type: 'project',
+              id: projectId
+            },
+            function () {
+              expBackoff.reset();
+              return done();
+            }
+          );
+        }
+      );
+    }
+  );
+
+  // max number of backoffs reached
+  expBackoff.on('fail',
+    function () {
+      return done(new Error('Max number of backoffs reached'));
+    }
+  );
+
+  expBackoff.backoff();
 };
