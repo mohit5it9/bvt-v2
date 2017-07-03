@@ -185,10 +185,10 @@ describe(testSuite + testSuiteDesc,
             logger.warn(bag.who, util.format('Cannot cancel build id: %d ' +
               'for project id: %s, err: %s, %s', runId, projectId, err,
               response));
+          logger.info(who, util.format('sleeping %s ms after cancel',
+            global.DELETE_PROJ_DELAY));
           setTimeout(
             function () {
-              logger.info(who, util.format('sleeping %s seconds after cancel',
-                global.DELETE_PROJ_DELAY));
               return next();
             }, global.DELETE_PROJ_DELAY
           );
