@@ -185,13 +185,7 @@ describe(testSuite + testSuiteDesc,
             logger.warn(bag.who, util.format('Cannot cancel build id: %d ' +
               'for project id: %s, err: %s, %s', runId, projectId, err,
               response));
-          logger.info(who, util.format('sleeping %s ms after cancel',
-            global.DELETE_PROJ_DELAY));
-          setTimeout(
-            function () {
-              return next();
-            }, global.DELETE_PROJ_DELAY
-          );
+          return next();
         }
       );
     }
@@ -201,27 +195,7 @@ describe(testSuite + testSuiteDesc,
       logger.debug(who, 'Inside');
 
       if (!projectId) return next();
-      global.suAdapter.deleteProjectById(projectId, {},
-        function (err, response) {
-          if (err) {
-            logger.warn(testSuite,
-              util.format('Cleanup-failed to delete the project with id:' +
-                '%s, err: %s, %s', projectId, err, util.inspect(response)
-              )
-            );
-            return next();
-          }
-          global.removeResource(
-            {
-              type: 'project',
-              id: projectId
-            },
-            function () {
-              return next();
-            }
-          );
-        }
-      );
+      global.deleteProjectWithBackoff(projectId, next);
     }
 
     after(
