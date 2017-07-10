@@ -49,7 +49,7 @@ echo "Commit" + $(date) > dummy_commit.txt
 
 echo "########### dummy commit ammend ##########"
 git add dummy_commit.txt 2>&1
-git commit --amend --no-edit 2>&1
+git commit -m "dummy commit $(date +%Y-%m-%d-%H-%M-%S)" 2>&1
 
 
 echo "########### pushing to branch: $BRANCH_NAME ##########"
