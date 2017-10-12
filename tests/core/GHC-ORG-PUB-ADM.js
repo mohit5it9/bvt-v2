@@ -140,7 +140,7 @@ describe(testSuite + testSuiteDesc,
                 if (err)
                   return reject(new Error(util.format('Cannot trigger manual ' +
                     'build for project id: %s, err: %s, %s', projectId, err,
-                    response)));
+                    util.inspect(response))));
 
                 return resolve(response);
               }
