@@ -33,9 +33,11 @@ git config --global user.name "shiptest-github-owner" 2>&1
 
 add_ssh_key
 
+rm -rf $PROJ_NAME || true
+
 echo "######### cloning repo #########"
 git clone git@github.com:$ORG_NAME/$PROJ_NAME 2>&1
-cd $PROJ_NAME
+pushd $PROJ_NAME
 
 if [ -z $BRANCH_NAME ]; then
   echo 'using default branch master'
@@ -55,4 +57,5 @@ git commit -m "dummy commit $(date +%Y-%m-%d-%H-%M-%S)" 2>&1
 echo "########### pushing to branch: $BRANCH_NAME ##########"
 git push -f origin $BRANCH_NAME 2>&1
 
+popd
 rm -rf $PROJ_NAME 2>&1
