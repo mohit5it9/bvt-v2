@@ -44,10 +44,10 @@ describe(testSuite + testSuiteDesc,
           type: 'ci'
         };
         global.ghcAdminAdapter.enableProjectById(projectId, json,
-          function (err) {
+          function (err, response) {
             if (err)
               return done(new Error(util.format('cannot enable private ' +
-                'project with id:%s', projectId)));
+                'project with id:%s %s', projectId, util.inspect(response))));
             global.saveResource(
               {
                 type: 'project',
