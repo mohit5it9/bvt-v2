@@ -280,7 +280,8 @@ describe(testSuite + testSuiteDesc,
           function (err, response) {
             if (err)
               return done(new Error(util.format('Cannot trigger custom build ' +
-                'for project id: %s, err: %s, %s', projectId, err, response)));
+                'for project id: %s, err: %s, %s', projectId, err,
+                util.inspect(response))));
             return done();
           }
         );
