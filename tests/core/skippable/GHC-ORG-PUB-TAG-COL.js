@@ -166,7 +166,7 @@ describe(testSuite + testSuiteDesc,
         initialDelay: 1000, // ms
         maxDelay: 2000 // max retry interval of 2 second
       });
-      expBackoff.failAfter(15); // fail after 15 attempts(30 sec)
+      expBackoff.failAfter(60); // fail after 60 attempts
       expBackoff.on('backoff',
         function (number, delay) {
           logger.info('No tag build for project with id:', projectId, 'yet.',
