@@ -283,7 +283,7 @@ describe(testSuite + testSuiteDesc,
           function (err, response) {
             assert.strictEqual(err, 401, util.format('Cannot trigger custom ' +
               'build for project id: %s, err: %s, %s', projectId, err,
-              response));
+              util.inspect(response)));
             return done();
           }
         );
